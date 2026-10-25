@@ -287,8 +287,8 @@
       fld("Описание", 'data-pf="description"', p.description, "textarea") +
       fld("Ссылка на пост в канале", 'data-pf="postUrl"', p.postUrl, "url", "Необязательно. На сайте появится ссылка «Открыть пост в канале».") +
       '<label class="chk"><input type="checkbox" id="f-isnew" data-pfb="isNew"' + (p.isNew ? " checked" : "") + "> Отметить как новинку</label>" +
-      '<div class="fld"><label>Фото (до 6, первое — главное)</label><div class="photos">' + photos +
-      ((p.photos || []).length < 6 ? '<label class="up" aria-label="Добавить фото">+<input type="file" accept="image/*" multiple id="f-photos" data-upload="1"></label>' : "") +
+      '<div class="fld"><label>Фото (до 10, первое — главное)</label><div class="photos">' + photos +
+      ((p.photos || []).length < 10 ? '<label class="up" aria-label="Добавить фото">+<input type="file" accept="image/*" multiple id="f-photos" data-upload="1"></label>' : "") +
       '</div><span class="hint">Фото автоматически уменьшаются до 1000 px.</span></div>';
   }
   function textsForm() {
@@ -445,7 +445,7 @@
     if (d.pfb) { var q = byId(ui.editing); if (q) { q[d.pfb] = t.checked; changed(false); } return; }
     if (d.upload) {
       var pe = byId(ui.editing); if (!pe) return;
-      var files = Array.prototype.slice.call(t.files || []).slice(0, 6 - pe.photos.length);
+      var files = Array.prototype.slice.call(t.files || []).slice(0, 10 - pe.photos.length);
       if (!files.length) return;
       say("Обрабатываю фото…");
       files.reduce(function (pr, f) { return pr.then(function () { return resize(f).then(function (u) { pe.photos.push(u); }); }); }, Promise.resolve())
@@ -455,6 +455,12 @@
 
   document.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && ui.open) { ui.open = null; renderModal(); } });
   window.addEventListener("beforeunload", function (ev) { if (ui.dirty) { ev.preventDefault(); ev.returnValue = ""; } });
+
+  /* ---------- bulk helpers for admin (used for imports) ---------- */
+  root.Diluga.admin = {
+    products: function () { return state ? state.products.map(function (p) { return { id: p.id, title: p.title, photos: (p.photos || []).slice() }; }) : null; },
+    setPhotos: function (id, arr) { if (!IS_ADMIN || !gh || !state) return false; var p = byId(id); if (!p) return false; p.photos = arr.slice(); changed(true); return true; }
+  };
 
   /* ---------- boot ---------- */
   if (IS_ADMIN) {
