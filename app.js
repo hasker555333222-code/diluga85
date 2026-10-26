@@ -543,6 +543,16 @@
     if (c && c.token) startAdmin(c); else renderLogin();
   } else {
     var el = document.getElementById("shop-data");
-    if (el) { state = JSON.parse(el.textContent); saved = clone(state); renderSite(); }
+    if (el) { state = JSON.parse(el.textContent); saved = clone(state); deepLink(); }
+  }
+  /* ?cat=jeans — открыть каталог на категории; ?item=tg192 — сразу открыть товар (для рекламы) */
+  function deepLink() {
+    var q = {};
+    try { location.search.replace(/^\?/, "").split("&").forEach(function (kv) { var i = kv.indexOf("="); if (i > 0) q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); }); } catch (e) {}
+    var c = q.cat, it = q.item;
+    if (c && state.categories.some(function (x) { return x.id === c; })) ui.cat = c;
+    renderSite();
+    if (it && byId(it)) { ui.open = it; ui.photoIdx = 0; renderModal(); goal("open_item"); }
+    else if (ui.cat !== "all") { var sec = document.getElementById("catalog"); if (sec && sec.scrollIntoView) setTimeout(function () { sec.scrollIntoView(); }, 0); }
   }
 })(typeof window !== "undefined" ? window : this);
