@@ -70,14 +70,14 @@
 
     var tg = safeUrl(L.telegram);
     var extra = (L.extra || []).filter(function (e) { return safeUrl(e.url); });
-    var links = (tg ? '<a class="lk" href="' + esc(tg) + '" target="_blank" rel="noopener"><span>Telegram-канал</span><span>' + esc(shortUrl(tg)) + "</span></a>" : "") +
+    var links = (tg ? '<a class="lk" href="' + esc(tg) + '" target="_blank" rel="noopener" data-goal="tg_channel"><span>Telegram-канал</span><span>' + esc(shortUrl(tg)) + "</span></a>" : "") +
       extra.map(function (e) { var u = safeUrl(e.url); return '<a class="lk" href="' + esc(u) + '" target="_blank" rel="noopener"><span>' + esc(e.label || shortUrl(u)) + "</span><span>" + esc(shortUrl(u)) + "</span></a>"; }).join("");
 
     return '<header class="top"><div class="wrap"><a class="logo" href="#catalog">' + esc(s.shopName) + '</a>' +
       '<nav class="nav"><a href="#catalog">Каталог</a><a href="#how">Как купить</a><a href="#delivery">Доставка</a><a href="#faq">Вопросы</a><a href="#about">О нас</a></nav>' +
-      (tg ? '<a class="btn btn-primary btn-sm" href="' + esc(tg) + '" target="_blank" rel="noopener">Telegram</a>' : "") + "</div></header>" +
+      (tg ? '<a class="btn btn-primary btn-sm" href="' + esc(tg) + '" target="_blank" rel="noopener" data-goal="tg_channel">Telegram</a>' : "") + "</div></header>" +
       '<main><div class="wrap hero"><div class="eyebrow">' + esc(s.heroEyebrow) + "</div><h1>" + esc(s.heroTitle) + "</h1><p>" + esc(s.heroText) + '</p>' +
-      '<div class="ctas"><a class="btn btn-primary" href="#catalog">Смотреть каталог</a>' + (tg ? '<a class="btn btn-ghost" href="' + esc(tg) + '" target="_blank" rel="noopener">Открыть канал</a>' : "") + "</div>" +
+      '<div class="ctas"><a class="btn btn-primary" href="#catalog">Смотреть каталог</a>' + (tg ? '<a class="btn btn-ghost" href="' + esc(tg) + '" target="_blank" rel="noopener" data-goal="tg_channel">Открыть канал</a>' : "") + "</div>" +
       '<div class="facts"><span class="fact">' + avail + " " + plural(avail, "вещь", "вещи", "вещей") + ' в наличии</span><span class="fact">' + esc(s.footerNote) + '</span><span class="fact">Отправка в день оплаты</span></div></div>' +
       '<section id="catalog" class="sec"><div class="wrap"><div class="sec-head"><div><h2>' + esc(s.catalogTitle) + '</h2><p class="note" style="margin:6px 0 0">' + esc(s.catalogNote) + (s.updatedAt ? " Каталог обновлён " + esc(ruDate(s.updatedAt)) + "." : "") + '</p></div>' +
       '<label class="toggle"><input type="checkbox" id="only-avail"' + (ui.onlyAvail ? " checked" : "") + "> Только в наличии</label></div>" +
@@ -110,7 +110,9 @@
     });
     var ld2 = { "@context": "https://schema.org", "@type": "ItemList", itemListElement: items };
     var ld3 = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqOf(state).map(function (x) { return { "@type": "Question", name: x.q, acceptedAnswer: { "@type": "Answer", text: x.a } }; }) };
-    return '<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n' +
+    var mid = /^\d{5,12}$/.test(String(s.metrikaId || "").trim()) ? String(s.metrikaId).trim() : "";
+    var metrika = mid ? '<!-- Yandex.Metrika counter -->\n<script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,"script","https://mc.yandex.ru/metrika/tag.js?id=' + mid + '", "ym");ym(' + mid + ', "init", {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});<\/script>\n<noscript><div><img src="https://mc.yandex.ru/watch/' + mid + '" style="position:absolute; left:-9999px;" alt="" /></div></noscript>\n<!-- /Yandex.Metrika counter -->\n' : "";
+    return '<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n' + metrika +
       "<title>" + esc(title) + "</title>\n" +
       '<meta name="description" content="' + esc(desc) + '">\n' +
       (site ? '<link rel="canonical" href="' + esc(site) + '/">\n' : "") +
@@ -194,7 +196,7 @@
       .filter(function (r) { return r[1]; }).map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
     var thumbs = (p.photos || []).length > 1 ? '<div class="thumbs">' + p.photos.map(function (src, i) { return '<button data-ph="' + i + '" aria-current="' + (i === idx) + '" aria-label="Фото ' + (i + 1) + '"><img src="' + esc(src) + '" alt=""></button>'; }).join("") + "</div>" : "";
     var buy = p.status === "sold" ? '<span class="note">Эта вещь уже продана. Похожие ищите в каталоге и в канале.</span>' :
-      (order ? '<a class="btn btn-primary" href="' + esc(order) + '" target="_blank" rel="noopener">' + (p.status === "reserved" ? "Спросить про бронь" : "Купить в Telegram") + "</a>" : "") +
+      (order ? '<a class="btn btn-primary" href="' + esc(order) + '" target="_blank" rel="noopener" data-goal="buy_click">' + (p.status === "reserved" ? "Спросить про бронь" : "Купить в Telegram") + "</a>" : "") +
       '<button class="btn btn-ghost" data-act="copy">Скопировать заявку</button>';
     $("#modal").innerHTML = '<div class="scrim" data-act="close-modal"><div class="modal" role="dialog" aria-modal="true" aria-label="' + esc(p.title) + '">' +
       '<div class="gal">' + photoBox(p, idx, true) + thumbs + "</div>" +
@@ -203,7 +205,7 @@
       '<div class="price">' + esc(p.status === "sold" ? "Продано" : money(p.price)) + (p.oldPrice && p.status !== "sold" ? "<s>" + esc(money(p.oldPrice)) + "</s>" : "") + "</div>" +
       '<dl class="spec">' + spec + "</dl>" + (p.description ? '<div class="txt">' + paras(p.description) + "</div>" : "") +
       '<div class="acts">' + buy + "</div>" + '<p class="note" id="copy-note">Нажмите «Скопировать заявку» и вставьте текст в сообщение — так мы быстрее найдём вещь.</p>' +
-      (safeUrl(p.postUrl) ? '<a class="note" href="' + esc(safeUrl(p.postUrl)) + '" target="_blank" rel="noopener">Открыть пост в канале</a>' : "") +
+      (safeUrl(p.postUrl) ? '<a class="note" href="' + esc(safeUrl(p.postUrl)) + '" target="_blank" rel="noopener" data-goal="tg_post">Открыть пост в канале</a>' : "") +
       "</div></div></div>";
   }
 
@@ -386,7 +388,8 @@
       fld("Заголовок в поиске (до 70 символов)", 'data-sf="metaTitle"', s.metaTitle) +
       fld("Описание в поиске (до 160 символов)", 'data-sf="metaDescription"', s.metaDescription, "textarea") +
       '<div class="sep"></div>' + fld("Код Яндекс Вебмастера", 'data-sf="yandexVerification"', s.yandexVerification || "", "text", "Только значение content из мета-тега yandex-verification") +
-      fld("Код Google Search Console", 'data-sf="googleVerification"', s.googleVerification || "", "text", "Только значение content из мета-тега google-site-verification");
+      fld("Код Google Search Console", 'data-sf="googleVerification"', s.googleVerification || "", "text", "Только значение content из мета-тега google-site-verification") +
+      fld("Номер счётчика Яндекс Метрики", 'data-sf="metrikaId" inputmode="numeric"', s.metrikaId || "", "text", "Только цифры, например 113803023. Пусто — счётчик не ставится");
   }
 
   function changed(full) { ui.dirty = true; ui.msg = ""; ui.msgKind = ""; renderSite(); if (full) renderAdmin(); else updateFooter(); }
@@ -449,9 +452,10 @@
     var d = t.dataset, act = d.act;
     if (act === "close-modal") { if (ev.target !== t) return; ui.open = null; renderModal(); return; }
     if (d.cat) { ui.cat = d.cat; renderSite(); return; }
-    if (d.open) { ui.open = d.open; ui.photoIdx = 0; renderModal(); return; }
+    if (d.open) { ui.open = d.open; ui.photoIdx = 0; renderModal(); goal("open_item"); return; }
     if (d.ph) { ui.photoIdx = +d.ph; renderModal(); return; }
     if (act === "copy") {
+      goal("copy_request");
       var p = byId(ui.open); if (!p) return;
       var txt = "Здравствуйте! Хочу купить: " + [p.brand, p.title].filter(Boolean).join(" ") + (p.size ? ", размер " + p.size : "") + (p.price ? ", " + money(p.price) : "") + (p.postUrl ? " — " + p.postUrl : "");
       var note = $("#copy-note");
@@ -517,6 +521,12 @@
     }
   });
 
+  function goal(name) {
+    if (IS_ADMIN || !state) return;
+    var id = String(state.settings.metrikaId || "").trim();
+    try { if (/^\d+$/.test(id) && typeof window.ym === "function") window.ym(+id, "reachGoal", name); } catch (e) {}
+  }
+  document.addEventListener("click", function (ev) { var g = ev.target.closest && ev.target.closest("[data-goal]"); if (g) goal(g.getAttribute("data-goal")); });
   document.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && ui.open) { ui.open = null; renderModal(); } });
   window.addEventListener("beforeunload", function (ev) { if (ui.dirty) { ev.preventDefault(); ev.returnValue = ""; } });
 
