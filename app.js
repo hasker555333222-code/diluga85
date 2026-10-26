@@ -18,6 +18,16 @@
   function shortUrl(u) { return String(u || "").replace(/^https?:\/\//, "").replace(/\/$/, ""); }
   function plural(n, a, b, c) { var m10 = n % 10, m100 = n % 100; if (m10 === 1 && m100 !== 11) return a; if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return b; return c; }
   function rank(p) { return p.status === "available" ? 0 : p.status === "reserved" ? 1 : 2; }
+  var DEFAULT_FAQ = [
+    { q: "Вещи оригинальные?", a: "Да. Брендовые вещи в каталоге — оригинал: Levi's, Nike, Ralph Lauren, Champion, Adidas и другие. По запросу пришлём видео-обзор, фото бирок и замеры." },
+    { q: "Как купить вещь?", a: "Нажмите «Купить в Telegram» в карточке товара или напишите менеджеру @eil_mart0 название вещи. Мы подтвердим наличие и пришлём детали оплаты." },
+    { q: "Куда и как быстро вы отправляете?", a: "По всей России и в страны СНГ. Отправляем в день оплаты. Способ и стоимость доставки согласуем в сообщениях." },
+    { q: "Как подобрать размер?", a: "У джинсов в описании указаны замеры в сантиметрах: талия, бёдра, посадка и длина. Для остальных вещей пришлём замеры по запросу." },
+    { q: "Что такое кастом diluga?", a: "Это оригинальное худи или свитшот, доработанное вручную: вшивки на груди, рукавах, спине или капюшоне. Каждый кастом существует в одном экземпляре." },
+    { q: "Где почитать отзывы?", a: "Отзывы покупателей собраны в Telegram-канале t.me/diluga85_otzivy." }
+  ];
+  function faqOf(state) { var f = state.settings.faq; return (f && f.length ? f : DEFAULT_FAQ).filter(function (x) { return x && x.q && x.a; }); }
+  function ruDate(iso) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ""); return m ? m[3] + "." + m[2] + "." + m[1] : ""; }
   function catName(state, id) { var c = state.categories.filter(function (x) { return x.id === id; })[0]; return c ? c.name : ""; }
 
   var HANGER = '<svg viewBox="0 0 64 40" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M32 12c0-3 2-5 5-5s5 2 5 5c0 4-6 4-10 9L5 33c-2 1-1 4 1 4h52c2 0 3-3 1-4L32 21"/></svg>';
@@ -64,18 +74,20 @@
       extra.map(function (e) { var u = safeUrl(e.url); return '<a class="lk" href="' + esc(u) + '" target="_blank" rel="noopener"><span>' + esc(e.label || shortUrl(u)) + "</span><span>" + esc(shortUrl(u)) + "</span></a>"; }).join("");
 
     return '<header class="top"><div class="wrap"><a class="logo" href="#catalog">' + esc(s.shopName) + '</a>' +
-      '<nav class="nav"><a href="#catalog">Каталог</a><a href="#how">Как купить</a><a href="#delivery">Доставка</a><a href="#about">О нас</a></nav>' +
+      '<nav class="nav"><a href="#catalog">Каталог</a><a href="#how">Как купить</a><a href="#delivery">Доставка</a><a href="#faq">Вопросы</a><a href="#about">О нас</a></nav>' +
       (tg ? '<a class="btn btn-primary btn-sm" href="' + esc(tg) + '" target="_blank" rel="noopener">Telegram</a>' : "") + "</div></header>" +
       '<main><div class="wrap hero"><div class="eyebrow">' + esc(s.heroEyebrow) + "</div><h1>" + esc(s.heroTitle) + "</h1><p>" + esc(s.heroText) + '</p>' +
       '<div class="ctas"><a class="btn btn-primary" href="#catalog">Смотреть каталог</a>' + (tg ? '<a class="btn btn-ghost" href="' + esc(tg) + '" target="_blank" rel="noopener">Открыть канал</a>' : "") + "</div>" +
       '<div class="facts"><span class="fact">' + avail + " " + plural(avail, "вещь", "вещи", "вещей") + ' в наличии</span><span class="fact">' + esc(s.footerNote) + '</span><span class="fact">Отправка в день оплаты</span></div></div>' +
-      '<section id="catalog" class="sec"><div class="wrap"><div class="sec-head"><div><h2>' + esc(s.catalogTitle) + '</h2><p class="note" style="margin:6px 0 0">' + esc(s.catalogNote) + '</p></div>' +
+      '<section id="catalog" class="sec"><div class="wrap"><div class="sec-head"><div><h2>' + esc(s.catalogTitle) + '</h2><p class="note" style="margin:6px 0 0">' + esc(s.catalogNote) + (s.updatedAt ? " Каталог обновлён " + esc(ruDate(s.updatedAt)) + "." : "") + '</p></div>' +
       '<label class="toggle"><input type="checkbox" id="only-avail"' + (ui.onlyAvail ? " checked" : "") + "> Только в наличии</label></div>" +
       '<div class="filters">' + chips + "</div>" + cards + "</div></section>" +
       '<section id="how" class="sec"><div class="wrap"><div class="sec-head"><h2>' + esc(s.howTitle) + '</h2></div><div class="steps">' +
       (s.howTo || []).filter(Boolean).map(function (t) { return '<div class="step"><p>' + esc(t) + "</p></div>"; }).join("") + "</div></div></section>" +
       '<section id="delivery" class="sec"><div class="wrap"><div class="sec-head"><h2>' + esc(s.deliveryTitle) + '</h2></div><div class="info">' +
       '<div class="box txt"><h3>Доставка</h3>' + paras(s.deliveryText) + '</div><div class="box txt"><h3>Оплата</h3>' + paras(s.paymentText) + '</div><div class="box txt"><h3>Состояние и возврат</h3>' + paras(s.returnText) + "</div></div></div></section>" +
+      '<section id="faq" class="sec"><div class="wrap"><div class="sec-head"><h2>Частые вопросы</h2></div><div class="faq">' +
+      faqOf(state).map(function (x) { return '<div class="qa"><h3>' + esc(x.q) + "</h3>" + paras(x.a) + "</div>"; }).join("") + "</div></div></section>" +
       '<section id="about" class="sec"><div class="wrap about"><div class="txt"><h2 style="font-family:var(--display);font-weight:400;font-size:clamp(26px,3.6vw,38px);margin-bottom:14px">' + esc(s.aboutTitle) + "</h2>" + paras(s.aboutText) + '</div><div class="links">' + links + "</div></div></section></main>" +
       '<footer><div class="wrap"><span>© ' + esc(s.shopName) + "</span><span>" + esc(s.footerNote) + "</span></div></footer>";
   }
@@ -87,11 +99,17 @@
     var title = s.metaTitle || s.shopName, desc = s.metaDescription || s.heroText;
     var firstPhoto = ""; state.products.some(function (p) { if (p.status !== "sold" && p.photos && p.photos[0] && !/^data:/.test(p.photos[0])) { firstPhoto = p.photos[0]; return true; } return false; });
     var v = version || Date.now().toString(36);
-    var ld = { "@context": "https://schema.org", "@type": "ClothingStore", name: s.shopName, url: site || undefined, description: desc, sameAs: [safeUrl(state.links.telegram)].filter(Boolean) };
+    var same = [safeUrl(state.links.telegram)].concat((state.links.extra || []).map(function (e) { return safeUrl(e.url); })).filter(function (u, i, a) { return u && a.indexOf(u) === i; });
+    var prices = state.products.filter(function (p) { return p.status !== "sold" && p.price; }).map(function (p) { return +p.price; });
+    var ld = { "@context": "https://schema.org", "@type": "ClothingStore", "@id": site ? site + "/#store" : undefined, name: s.shopName, url: site ? site + "/" : undefined, description: desc,
+      image: site && firstPhoto ? site + "/" + firstPhoto : undefined, sameAs: same, areaServed: "RU", currenciesAccepted: "RUB",
+      priceRange: prices.length ? Math.min.apply(null, prices) + "–" + Math.max.apply(null, prices) + " RUB" : undefined,
+      contactPoint: safeUrl(state.links.order) ? { "@type": "ContactPoint", contactType: "sales", url: safeUrl(state.links.order), availableLanguage: "ru" } : undefined };
     var items = state.products.filter(function (p) { return p.status !== "sold" && p.price; }).map(function (p, i) {
-      return { "@type": "ListItem", position: i + 1, item: { "@type": "Product", name: [p.brand, p.title].filter(Boolean).join(" "), description: p.description, image: p.photos && p.photos[0] && site ? site + "/" + p.photos[0] : undefined, offers: { "@type": "Offer", price: String(p.price), priceCurrency: "RUB", availability: p.status === "reserved" ? "https://schema.org/LimitedAvailability" : "https://schema.org/InStock", itemCondition: "https://schema.org/UsedCondition" } } };
+      return { "@type": "ListItem", position: i + 1, item: { "@type": "Product", sku: p.id, name: [p.brand, p.title].filter(Boolean).join(" "), description: p.description, brand: p.brand ? { "@type": "Brand", name: p.brand } : undefined, size: p.size || undefined, category: catName(state, p.category) || undefined, image: p.photos && p.photos[0] && site ? site + "/" + p.photos[0] : undefined, offers: { "@type": "Offer", url: site ? site + "/" : undefined, price: String(p.price), priceCurrency: "RUB", availability: p.status === "reserved" ? "https://schema.org/LimitedAvailability" : "https://schema.org/InStock", itemCondition: "https://schema.org/UsedCondition" } } };
     });
     var ld2 = { "@context": "https://schema.org", "@type": "ItemList", itemListElement: items };
+    var ld3 = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqOf(state).map(function (x) { return { "@type": "Question", name: x.q, acceptedAnswer: { "@type": "Answer", text: x.a } }; }) };
     return '<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n' +
       "<title>" + esc(title) + "</title>\n" +
       '<meta name="description" content="' + esc(desc) + '">\n' +
@@ -99,11 +117,14 @@
       '<meta property="og:type" content="website">\n<meta property="og:title" content="' + esc(title) + '">\n<meta property="og:description" content="' + esc(desc) + '">\n' +
       (site ? '<meta property="og:url" content="' + esc(site) + '/">\n' : "") +
       (site && firstPhoto ? '<meta property="og:image" content="' + esc(site + "/" + firstPhoto) + '">\n' : "") +
+      (s.yandexVerification ? '<meta name="yandex-verification" content="' + esc(s.yandexVerification) + '">\n' : "") +
+      (s.googleVerification ? '<meta name="google-site-verification" content="' + esc(s.googleVerification) + '">\n' : "") +
       '<meta name="color-scheme" content="light dark">\n' +
       '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="' + FONTS + '">\n' +
       '<link rel="stylesheet" href="style.css?v=' + v + '">\n' +
       '<script type="application/ld+json">' + jsonForScript(ld) + "<\/script>\n" +
       '<script type="application/ld+json">' + jsonForScript(ld2) + "<\/script>\n" +
+      '<script type="application/ld+json">' + jsonForScript(ld3) + "<\/script>\n" +
       "</head>\n<body>\n" +
       '<div id="site">' + siteHTML(state) + "</div>\n<div id=\"modal\"></div>\n" +
       '<script type="application/json" id="shop-data">' + jsonForScript(state) + "<\/script>\n" +
@@ -119,7 +140,37 @@
     return "User-agent: *\nAllow: /\nDisallow: /admin.html\n" + (site ? "Sitemap: " + site + "/sitemap.xml\n" : "");
   }
 
-  var API = { siteHTML: siteHTML, buildIndexHtml: buildIndexHtml, buildSitemap: buildSitemap, buildRobots: buildRobots };
+  function oneLine(t) { return String(t || "").replace(/\s*\n+\s*/g, " ").trim(); }
+  function buildLlms(state) {
+    var s = state.settings, L = state.links, site = (s.siteUrl || "").replace(/\/$/, "");
+    var avail = state.products.filter(function (p) { return p.status !== "sold"; });
+    var out = "# " + s.shopName + "\n\n> " + oneLine(s.metaDescription || s.heroText) + "\n\n";
+    out += oneLine(s.aboutText) + "\n\n";
+    out += "## Каталог\n\n";
+    out += "- Вещей в наличии: " + avail.length + (s.updatedAt ? " (на " + ruDate(s.updatedAt) + ")" : "") + "\n";
+    state.categories.forEach(function (c) {
+      var n = avail.filter(function (p) { return p.category === c.id; }).length;
+      if (n) out += "- " + c.name + ": " + n + "\n";
+    });
+    out += "- Каждая вещь в одном экземпляре; кастомы diluga сделаны вручную на оригинальных вещах\n\n";
+    out += "## Вещи в наличии\n\n";
+    avail.forEach(function (p) {
+      out += "- " + [p.brand, p.title].filter(Boolean).join(" — ") + (p.size ? ", размер " + p.size : "") + (p.price ? ", " + p.price + " ₽" : "") + (p.status === "reserved" ? " (бронь)" : "") + (safeUrl(p.postUrl) ? " — " + safeUrl(p.postUrl) : "") + "\n";
+    });
+    out += "\n## Как купить\n\n";
+    (s.howTo || []).filter(Boolean).forEach(function (t, i) { out += (i + 1) + ". " + oneLine(t) + "\n"; });
+    out += "\n## Доставка и оплата\n\n- " + oneLine(s.deliveryText) + "\n- " + oneLine(s.paymentText) + "\n- " + oneLine(s.returnText) + "\n";
+    out += "\n## Частые вопросы\n\n";
+    faqOf(state).forEach(function (x) { out += "### " + oneLine(x.q) + "\n\n" + oneLine(x.a) + "\n\n"; });
+    out += "## Ссылки\n\n";
+    if (site) out += "- [Сайт и каталог](" + site + "/)\n";
+    if (safeUrl(L.telegram)) out += "- [Telegram-канал](" + safeUrl(L.telegram) + "): все поступления\n";
+    if (safeUrl(L.order)) out += "- [Заказ и вопросы](" + safeUrl(L.order) + ")\n";
+    (L.extra || []).forEach(function (e) { var u = safeUrl(e.url); if (u && u !== safeUrl(L.order)) out += "- [" + (e.label || shortUrl(u)) + "](" + u + ")\n"; });
+    return out;
+  }
+
+  var API = { siteHTML: siteHTML, buildIndexHtml: buildIndexHtml, buildSitemap: buildSitemap, buildRobots: buildRobots, buildLlms: buildLlms };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   if (typeof document === "undefined") return;
   root.Diluga = API;
@@ -208,6 +259,8 @@
     if (!gh) return;
     ui.busy = true; say("Сохраняю… Не закрывайте страницу.");
     var out = clone(state), files = [], n = 0;
+    out.settings.updatedAt = new Date().toISOString().slice(0, 10);
+    if (!out.settings.faq || !out.settings.faq.length) out.settings.faq = clone(DEFAULT_FAQ);
     out.products.forEach(function (p) {
       p.photos = (p.photos || []).map(function (u) {
         if (!/^data:image\//.test(u)) return u;
@@ -222,6 +275,7 @@
     files.push({ path: "index.html", content: buildIndexHtml(out, v) });
     var sm = buildSitemap(out); if (sm) files.push({ path: "sitemap.xml", content: sm });
     files.push({ path: "robots.txt", content: buildRobots(out) });
+    files.push({ path: "llms.txt", content: buildLlms(out) });
     var host = (out.settings.siteUrl || "").replace(/^https?:\/\//, "").replace(/\/.*$/, "");
     if (host) files.push({ path: "CNAME", content: host + "\n" });
     commitFiles(files, "Обновление каталога из админки").then(function () {
@@ -302,7 +356,12 @@
       '<div class="sep"></div>' + fld("Заголовок блока доставки", 'data-sf="deliveryTitle"', s.deliveryTitle) +
       fld("Доставка", 'data-sf="deliveryText"', s.deliveryText, "textarea") + fld("Оплата", 'data-sf="paymentText"', s.paymentText, "textarea") + fld("Состояние и возврат", 'data-sf="returnText"', s.returnText, "textarea") +
       '<div class="sep"></div>' + fld("Заголовок «О магазине»", 'data-sf="aboutTitle"', s.aboutTitle) + fld("Текст о магазине", 'data-sf="aboutText"', s.aboutText, "textarea", "Новая строка = новый абзац") +
-      fld("Короткий слоган (подвал и плашка)", 'data-sf="footerNote"', s.footerNote);
+      fld("Короткий слоган (подвал и плашка)", 'data-sf="footerNote"', s.footerNote) +
+      '<div class="sep"></div><div class="fld"><label>Частые вопросы</label><span class="hint">Показываются на сайте и помогают поисковикам и ИИ-ассистентам отвечать про магазин.</span></div>' +
+      faqOf(state).map(function (x, i) {
+        return '<div class="exl" style="grid-template-columns:minmax(0,1fr) auto">' + '<div style="display:flex;flex-direction:column;gap:8px;min-width:0">' + fld("Вопрос " + (i + 1), 'data-fq="' + i + '" data-fqf="q"', x.q) + fld("Ответ", 'data-fq="' + i + '" data-fqf="a"', x.a, "textarea") + "</div>" +
+          '<button class="ib danger" data-fqdel="' + i + '" aria-label="Удалить вопрос">✕</button></div>';
+      }).join("") + '<button class="btn btn-ghost btn-sm" data-act="fqadd" style="align-self:flex-start">+ Добавить вопрос</button>';
   }
   function linksForm() {
     var L = state.links;
@@ -325,7 +384,9 @@
     return '<p class="hint">Так сайт выглядит в поиске Яндекса и Google и в превью ссылок.</p>' +
       fld("Адрес сайта", 'data-sf="siteUrl"', s.siteUrl, "url", "Например: https://diluga85.ru — после покупки домена впишите его сюда") +
       fld("Заголовок в поиске (до 70 символов)", 'data-sf="metaTitle"', s.metaTitle) +
-      fld("Описание в поиске (до 160 символов)", 'data-sf="metaDescription"', s.metaDescription, "textarea");
+      fld("Описание в поиске (до 160 символов)", 'data-sf="metaDescription"', s.metaDescription, "textarea") +
+      '<div class="sep"></div>' + fld("Код Яндекс Вебмастера", 'data-sf="yandexVerification"', s.yandexVerification || "", "text", "Только значение content из мета-тега yandex-verification") +
+      fld("Код Google Search Console", 'data-sf="googleVerification"', s.googleVerification || "", "text", "Только значение content из мета-тега google-site-verification");
   }
 
   function changed(full) { ui.dirty = true; ui.msg = ""; ui.msgKind = ""; renderSite(); if (full) renderAdmin(); else updateFooter(); }
@@ -383,7 +444,7 @@
   });
 
   document.addEventListener("click", function (ev) {
-    var t = ev.target.closest("[data-act],[data-cat],[data-open],[data-ph],[data-tab],[data-pedit],[data-pdel],[data-pdel-yes],[data-pup],[data-phdel],[data-phfirst],[data-exdel],[data-cdel],[data-cup]");
+    var t = ev.target.closest("[data-act],[data-cat],[data-open],[data-ph],[data-tab],[data-pedit],[data-pdel],[data-pdel-yes],[data-pup],[data-phdel],[data-phfirst],[data-exdel],[data-fqdel],[data-cdel],[data-cup]");
     if (!t || !state) return;
     var d = t.dataset, act = d.act;
     if (act === "close-modal") { if (ev.target !== t) return; ui.open = null; renderModal(); return; }
@@ -414,6 +475,8 @@
     if (d.pup) { var i = +d.pup; if (i > 0) { var a = state.products, x = a[i]; a[i] = a[i - 1]; a[i - 1] = x; changed(true); } return; }
     if (d.phdel) { var pe = byId(ui.editing); if (pe) { pe.photos.splice(+d.phdel, 1); changed(true); } return; }
     if (d.phfirst) { var pf = byId(ui.editing); if (pf) { var src = pf.photos.splice(+d.phfirst, 1)[0]; pf.photos.unshift(src); changed(true); } return; }
+    if (act === "fqadd") { state.settings.faq = clone(faqOf(state)); state.settings.faq.push({ q: "", a: "" }); changed(true); return; }
+    if (d.fqdel) { state.settings.faq = clone(faqOf(state)); state.settings.faq.splice(+d.fqdel, 1); changed(true); return; }
     if (act === "exadd") { state.links.extra = state.links.extra || []; state.links.extra.push({ label: "", url: "" }); changed(true); return; }
     if (d.exdel) { state.links.extra.splice(+d.exdel, 1); changed(true); return; }
     if (act === "cadd") { state.categories.push({ id: "c" + Date.now().toString(36), name: "Новая категория" }); changed(true); return; }
@@ -435,6 +498,7 @@
     if (d.lf) { state.links[d.lf] = t.value; changed(false); return; }
     if (d.exf) { state.links.extra[+d.ex][d.exf] = t.value; changed(false); return; }
     if (d.cf) { state.categories[+d.cf].name = t.value; changed(false); return; }
+    if (d.fqf) { if (!state.settings.faq || !state.settings.faq.length) state.settings.faq = clone(DEFAULT_FAQ); state.settings.faq[+d.fq][d.fqf] = t.value; changed(false); return; }
   });
 
   document.addEventListener("change", function (ev) {
@@ -459,6 +523,7 @@
   /* ---------- bulk helpers for admin (used for imports) ---------- */
   root.Diluga.admin = {
     products: function () { return state ? state.products.map(function (p) { return { id: p.id, title: p.title, photos: (p.photos || []).slice() }; }) : null; },
+    touch: function () { if (!IS_ADMIN || !gh || !state) return false; changed(true); return true; },
     setPhotos: function (id, arr) { if (!IS_ADMIN || !gh || !state) return false; var p = byId(id); if (!p) return false; p.photos = arr.slice(); changed(true); return true; }
   };
 
