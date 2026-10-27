@@ -224,7 +224,7 @@
     if (fine) {
       var cur = document.createElement("div"); cur.className = "cur"; document.body.appendChild(cur); root.classList.add("has-cur");
       var x = -100, y = -100, cx = -100, cy = -100;
-      (function loop() { cx += (x - cx) * 0.2; cy += (y - cy) * 0.2; cur.style.transform = "translate(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px)"; requestAnimationFrame(loop); })();
+      (function loop() { cx = x; cy = y; cur.style.transform = "translate(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px)"; requestAnimationFrame(loop); })();
       document.addEventListener("mousemove", function (e) {
         x = e.clientX; y = e.clientY;
         var t = e.target.closest ? e.target : null;
