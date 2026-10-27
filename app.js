@@ -46,6 +46,13 @@
   }
 
   /* ---------- markup of the public site (pure: also used to pre-render index.html) ---------- */
+  function marqueeHTML(state) {
+    var seen = {}, words = [];
+    (state.products || []).forEach(function (p) { String(p.brand || "").split("×").forEach(function (b) { b = b.trim(); var k = b.toLowerCase(); if (b && k !== "diluga" && !seen[k]) { seen[k] = 1; words.push(b); } }); });
+    words = words.slice(0, 14).concat(["Vintage", "Original", "Custom by diluga"]);
+    var row = words.map(function (w) { return "<span>" + esc(w) + "</span>"; }).join("");
+    return '<div class="marquee" aria-hidden="true"><div class="mq">' + row + row + "</div></div>";
+  }
   function siteHTML(state, ui) {
     ui = ui || { cat: "all", onlyAvail: false };
     var s = state.settings, L = state.links;
@@ -78,9 +85,9 @@
     return '<header class="top"><div class="wrap"><a class="logo" href="#catalog">' + esc(s.shopName) + '</a>' +
       '<nav class="nav"><a href="#catalog">Каталог</a><a href="#how">Как купить</a><a href="#delivery">Доставка</a><a href="#faq">Вопросы</a><a href="#about">О нас</a></nav>' +
       (tg ? '<a class="btn btn-primary btn-sm" href="' + esc(tg) + '" target="_blank" rel="noopener" data-goal="tg_channel">Telegram</a>' : "") + "</div></header>" +
-      '<main><div class="wrap hero"><div class="eyebrow">' + esc(s.heroEyebrow) + "</div><h1>" + esc(s.heroTitle) + "</h1><p>" + esc(s.heroText) + '</p>' +
+      '<main><div class="wrap hero"><div class="eyebrow">' + esc(s.heroEyebrow) + "</div><h1>" + String(s.heroTitle || "").split(/\s+/).filter(Boolean).map(function (w, i) { return '<span class="w" style="--i:' + i + '">' + esc(w) + "</span>"; }).join(" ") + "</h1><p>" + esc(s.heroText) + '</p>' +
       '<div class="ctas"><a class="btn btn-primary" href="#catalog">Смотреть каталог</a>' + (tg ? '<a class="btn btn-ghost" href="' + esc(tg) + '" target="_blank" rel="noopener" data-goal="tg_channel">Открыть канал</a>' : "") + "</div>" +
-      '<div class="facts"><span class="fact">' + avail + " " + plural(avail, "вещь", "вещи", "вещей") + ' в наличии</span><span class="fact">' + esc(s.footerNote) + '</span><span class="fact">Отправка в день оплаты</span></div></div>' +
+      '<div class="facts"><span class="fact">' + avail + " " + plural(avail, "вещь", "вещи", "вещей") + ' в наличии</span><span class="fact">' + esc(s.footerNote) + '</span><span class="fact">Отправка в день оплаты</span></div></div>' + marqueeHTML(state) +
       '<section id="catalog" class="sec"><div class="wrap"><div class="sec-head"><div><h2>' + esc(s.catalogTitle) + '</h2><p class="note" style="margin:6px 0 0">' + esc(s.catalogNote) + (s.updatedAt ? " Каталог обновлён " + esc(ruDate(s.updatedAt)) + "." : "") + '</p></div>' +
       '<label class="toggle"><input type="checkbox" id="only-avail"' + (ui.onlyAvail ? " checked" : "") + "> Только в наличии</label></div>" +
       '<div class="filters">' + chips + "</div>" + cards + "</div></section>" +
@@ -188,7 +195,19 @@
   var ui = { cat: "all", onlyAvail: false, admin: false, tab: "products", editing: null, busy: false, msg: "", msgKind: "", dirty: false, confirmDel: null, open: null, photoIdx: 0 };
   function byId(id) { return state.products.filter(function (p) { return p.id === id; })[0]; }
 
-  function renderSite() { var el = $("#site"); if (el && state) el.innerHTML = siteHTML(state, ui); }
+  function renderSite() { var el = $("#site"); if (el && state) { el.innerHTML = siteHTML(state, ui); reveal(); } }
+  var io = null;
+  function reveal() {
+    if (IS_ADMIN || typeof IntersectionObserver === "undefined") return;
+    var root = document.documentElement;
+    if (!root.classList.contains("rv")) { root.classList.add("rv"); setTimeout(function () { root.classList.add("rv-done"); }, 1800); }
+    if (!io) io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -6% 0px" });
+    var n = 0;
+    document.querySelectorAll("#site .card, #site .step, #site .box, #site .qa, #site .lk, #site .sec-head, #site .filters").forEach(function (el) {
+      if (el.hasAttribute("data-rv")) return;
+      el.setAttribute("data-rv", ""); el.style.setProperty("--d", (n++ % 6) * 70 + "ms"); io.observe(el);
+    });
+  }
 
   function renderModal() {
     var p = ui.open && byId(ui.open);
