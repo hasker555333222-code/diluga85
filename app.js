@@ -223,36 +223,56 @@
     } catch (e) {}
     if (fine) {
       var cur = document.createElement("div"); cur.className = "cur"; document.body.appendChild(cur); root.classList.add("has-cur");
-      var x = -100, y = -100, cx = -100, cy = -100;
-      (function loop() { cx = x; cy = y; cur.style.transform = "translate(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px)"; requestAnimationFrame(loop); })();
-      document.addEventListener("mousemove", function (e) {
-        x = e.clientX; y = e.clientY;
-        var t = e.target.closest ? e.target : null;
+      var ev = null, pend = false, lastCard = null, lastBtn = null, hero = null;
+      var frame = function () {
+        pend = false; var e = ev; if (!e) return;
+        cur.style.transform = "translate3d(" + e.clientX + "px," + e.clientY + "px,0)";
+        var t = e.target && e.target.closest ? e.target : null;
         var card = t && t.closest("#site .card"), hot = t && t.closest("a,button,label,input");
         cur.classList.toggle("view", !!card); cur.classList.toggle("big", !card && !!hot);
-        document.querySelectorAll("#site .card.tilt").forEach(function (k) { if (k !== card) { k.classList.remove("tilt"); } });
+        if (lastCard && lastCard !== card) lastCard.classList.remove("tilt");
+        lastCard = card;
         if (card) {
           var r = card.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
           card.classList.add("tilt");
-          card.style.setProperty("--rx", (-py * 16).toFixed(2) + "deg"); card.style.setProperty("--ry", (px * 16).toFixed(2) + "deg");
-          card.style.setProperty("--gx", ((px + 0.5) * 100).toFixed(1) + "%"); card.style.setProperty("--gy", ((py + 0.5) * 100).toFixed(1) + "%");
+          card.style.setProperty("--rx", (-py * 14).toFixed(1) + "deg"); card.style.setProperty("--ry", (px * 14).toFixed(1) + "deg");
+          card.style.setProperty("--gx", ((px + 0.5) * 100).toFixed(0) + "%"); card.style.setProperty("--gy", ((py + 0.5) * 100).toFixed(0) + "%");
         }
         var b = t && t.closest("#site .btn, #modal .btn");
-        document.querySelectorAll(".btn.mag").forEach(function (k) { if (k !== b) k.classList.remove("mag"); });
-        if (b) { var q = b.getBoundingClientRect(); b.classList.add("mag"); b.style.setProperty("--mx", ((e.clientX - q.left - q.width / 2) * 0.35).toFixed(1) + "px"); b.style.setProperty("--my", ((e.clientY - q.top - q.height / 2) * 0.45).toFixed(1) + "px"); }
-        var hero = document.querySelector("#site .hero");
-        if (hero) { hero.style.setProperty("--mx", (e.clientX / innerWidth - 0.5).toFixed(3)); hero.style.setProperty("--my", (e.clientY / innerHeight - 0.5).toFixed(3)); }
-      }, { passive: true });
-      document.addEventListener("mouseleave", function () { x = y = -100; });
+        if (lastBtn && lastBtn !== b) lastBtn.classList.remove("mag");
+        lastBtn = b;
+        if (b) { var q = b.getBoundingClientRect(); b.classList.add("mag"); b.style.setProperty("--mx", ((e.clientX - q.left - q.width / 2) * 0.3).toFixed(1) + "px"); b.style.setProperty("--my", ((e.clientY - q.top - q.height / 2) * 0.4).toFixed(1) + "px"); }
+        if (!hero || !hero.isConnected) hero = document.querySelector("#site .hero");
+        if (hero && window.scrollY < window.innerHeight) { hero.style.setProperty("--mx", (e.clientX / innerWidth - 0.5).toFixed(3)); hero.style.setProperty("--my", (e.clientY / innerHeight - 0.5).toFixed(3)); }
+      };
+      document.addEventListener("mousemove", function (e) { ev = e; if (!pend) { pend = true; requestAnimationFrame(frame); } }, { passive: true });
+      document.addEventListener("mouseleave", function () { cur.style.transform = "translate3d(-100px,-100px,0)"; });
     }
-    var last = window.scrollY, v = 0, off = 0;
-    window.addEventListener("scroll", function () { v = Math.min(80, v + Math.abs(window.scrollY - last)); last = window.scrollY; }, { passive: true });
-    (function mq() {
-      off += 0.7 + v * 0.35; v *= 0.9;
-      document.querySelectorAll("#site .mqw .mq").forEach(function (m, i) {
-        var w = m.scrollWidth / 3; if (!w) return;
-        var o = off % w; m.style.transform = "translate3d(" + (i % 2 ? -o : -(w - o)) + "px,0,0)";
-      });
+    var last = window.scrollY, v = 0, off = 0, rows = [], widths = [], visible = true;
+    var measure = function () { rows = [].slice.call(document.querySelectorAll("#site .mqw .mq")); widths = rows.map(function (m) { return m.scrollWidth / 3; }); };
+    window.addEventListener("resize", measure);
+    window.addEventListener("load", measure);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+    window.addEventListener("scroll", function () { v = Math.min(60, v + Math.abs(window.scrollY - last)); last = window.scrollY; }, { passive: true });
+    var watchQ = null;
+    var watch = function () {
+      var w = document.querySelector("#site .mqw"); if (!w || typeof IntersectionObserver === "undefined") return;
+      if (watchQ) watchQ.disconnect();
+      watchQ = new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }); watchQ.observe(w);
+    };
+    window.__dlMq = function () { measure(); watch(); };
+    window.__dlMq();
+    var prev = performance.now();
+    (function mq(now) {
+      var dt = Math.min(50, (now || prev) - prev); prev = now || prev;
+      off += (0.042 + v * 0.02) * dt; v *= 0.9;
+      if (visible) {
+        if (rows.length && !rows[0].isConnected) measure();
+        for (var i = 0; i < rows.length; i++) {
+          var w = widths[i]; if (!w) continue;
+          var o = off % w; rows[i].style.transform = "translate3d(" + (i % 2 ? -o : -(w - o)).toFixed(1) + "px,0,0)";
+        }
+      }
       requestAnimationFrame(mq);
     })();
   }
@@ -266,13 +286,15 @@
       var upd = function () {
         tick = false;
         var h = document.querySelector("#site .hero"); if (!h) return;
-        var hh = h.offsetHeight, top = Math.min(64, window.innerHeight - hh);
+        if (h !== upd.h) { upd.h = h; upd.hh = h.offsetHeight; }
+        var hh = upd.hh, top = Math.min(64, window.innerHeight - hh);
         h.style.top = top + "px";
         var p = Math.max(0, Math.min(1, (window.scrollY - Math.max(0, -top)) / (hh * 0.85)));
         h.style.setProperty("--p", p.toFixed(3));
       };
       window.addEventListener("scroll", function () { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true });
-      window.addEventListener("resize", upd);
+      window.addEventListener("resize", function () { upd.h = null; upd(); });
+      window.addEventListener("load", function () { upd.h = null; upd(); });
       window.__dlUpd = upd;
       setTimeout(function () { root.classList.add("sc"); upd(); }, 1850);
       upd();
@@ -280,6 +302,7 @@
     if (!io) io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); if (e.target.classList.contains("sec-head")) scramble(e.target.querySelector("h2")); } }); }, { rootMargin: "0px 0px -6% 0px" });
     if (window.__dlUpd) window.__dlUpd();
     fx();
+    if (window.__dlMq) window.__dlMq();
     var n = 0;
     document.querySelectorAll("#site .card, #site .step, #site .box, #site .qa, #site .lk, #site .sec-head, #site .filters").forEach(function (el) {
       if (el.hasAttribute("data-rv")) return;
