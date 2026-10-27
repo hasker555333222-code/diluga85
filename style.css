@@ -190,3 +190,7 @@ footer .wrap{padding-block:24px;display:flex;flex-wrap:wrap;justify-content:spac
 .qa{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
 .qa h3{font-size:16px;margin:0 0 6px}
 .qa p{margin:0;color:var(--muted)}
+.btn-avito{background:#00aaff;color:#fff}
+.btn-avito:hover{filter:brightness(1.08)}
+footer .flinks{display:flex;gap:16px}
+footer .flinks a{color:inherit;text-decoration:underline;text-underline-offset:3px}

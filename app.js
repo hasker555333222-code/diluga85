@@ -70,7 +70,9 @@
 
     var tg = safeUrl(L.telegram);
     var extra = (L.extra || []).filter(function (e) { return safeUrl(e.url); });
+    var av = safeUrl(L.avito);
     var links = (tg ? '<a class="lk" href="' + esc(tg) + '" target="_blank" rel="noopener" data-goal="tg_channel"><span>Telegram-канал</span><span>' + esc(shortUrl(tg)) + "</span></a>" : "") +
+      (av ? '<a class="lk" href="' + esc(av) + '" target="_blank" rel="noopener" data-goal="avito_profile"><span>Мы на Авито</span><span>' + esc(shortUrl(av)) + "</span></a>" : "") +
       extra.map(function (e) { var u = safeUrl(e.url); return '<a class="lk" href="' + esc(u) + '" target="_blank" rel="noopener"><span>' + esc(e.label || shortUrl(u)) + "</span><span>" + esc(shortUrl(u)) + "</span></a>"; }).join("");
 
     return '<header class="top"><div class="wrap"><a class="logo" href="#catalog">' + esc(s.shopName) + '</a>' +
@@ -89,7 +91,9 @@
       '<section id="faq" class="sec"><div class="wrap"><div class="sec-head"><h2>Частые вопросы</h2></div><div class="faq">' +
       faqOf(state).map(function (x) { return '<div class="qa"><h3>' + esc(x.q) + "</h3>" + paras(x.a) + "</div>"; }).join("") + "</div></div></section>" +
       '<section id="about" class="sec"><div class="wrap about"><div class="txt"><h2 style="font-family:var(--display);font-weight:400;font-size:clamp(26px,3.6vw,38px);margin-bottom:14px">' + esc(s.aboutTitle) + "</h2>" + paras(s.aboutText) + '</div><div class="links">' + links + "</div></div></section></main>" +
-      '<footer><div class="wrap"><span>© ' + esc(s.shopName) + "</span><span>" + esc(s.footerNote) + "</span></div></footer>";
+      '<footer><div class="wrap"><span>© ' + esc(s.shopName) + "</span><span>" + esc(s.footerNote) + "</span>" +
+      ((tg || av) ? '<span class="flinks">' + (tg ? '<a href="' + esc(tg) + '" target="_blank" rel="noopener" data-goal="tg_channel">Telegram</a>' : "") + (av ? '<a href="' + esc(av) + '" target="_blank" rel="noopener" data-goal="avito_profile">Профиль на Авито</a>' : "") + "</span>" : "") +
+      "</div></footer>";
   }
 
   /* ---------- full index.html (written by the admin on every save) ---------- */
@@ -99,7 +103,7 @@
     var title = s.metaTitle || s.shopName, desc = s.metaDescription || s.heroText;
     var firstPhoto = ""; state.products.some(function (p) { if (p.status !== "sold" && p.photos && p.photos[0] && !/^data:/.test(p.photos[0])) { firstPhoto = p.photos[0]; return true; } return false; });
     var v = version || Date.now().toString(36);
-    var same = [safeUrl(state.links.telegram)].concat((state.links.extra || []).map(function (e) { return safeUrl(e.url); })).filter(function (u, i, a) { return u && a.indexOf(u) === i; });
+    var same = [safeUrl(state.links.telegram), safeUrl(state.links.avito)].concat((state.links.extra || []).map(function (e) { return safeUrl(e.url); })).filter(function (u, i, a) { return u && a.indexOf(u) === i; });
     var prices = state.products.filter(function (p) { return p.status !== "sold" && p.price; }).map(function (p) { return +p.price; });
     var ld = { "@context": "https://schema.org", "@type": "ClothingStore", "@id": site ? site + "/#store" : undefined, name: s.shopName, url: site ? site + "/" : undefined, description: desc,
       image: site && firstPhoto ? site + "/" + firstPhoto : undefined, sameAs: same, areaServed: "RU", currenciesAccepted: "RUB",
@@ -191,12 +195,15 @@
     if (!p) { $("#modal").innerHTML = ""; document.body.style.overflow = ""; return; }
     document.body.style.overflow = "hidden";
     var idx = Math.min(ui.photoIdx, Math.max(0, (p.photos || []).length - 1));
-    var order = safeUrl(state.links.order) || safeUrl(state.links.telegram);
+    var order = safeUrl(p.tgUrl) || safeUrl(state.links.order) || safeUrl(state.links.telegram);
+    var avItem = safeUrl(p.avitoUrl), avProf = safeUrl(state.links.avito);
     var spec = [["Бренд", p.brand], ["Размер", p.size], ["Состояние", p.condition], ["Категория", catName(state, p.category)], ["Статус", STATUS[p.status]]]
       .filter(function (r) { return r[1]; }).map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
     var thumbs = (p.photos || []).length > 1 ? '<div class="thumbs">' + p.photos.map(function (src, i) { return '<button data-ph="' + i + '" aria-current="' + (i === idx) + '" aria-label="Фото ' + (i + 1) + '"><img src="' + esc(src) + '" alt=""></button>'; }).join("") + "</div>" : "";
     var buy = p.status === "sold" ? '<span class="note">Эта вещь уже продана. Похожие ищите в каталоге и в канале.</span>' :
       (order ? '<a class="btn btn-primary" href="' + esc(order) + '" target="_blank" rel="noopener" data-goal="buy_click">' + (p.status === "reserved" ? "Спросить про бронь" : "Купить в Telegram") + "</a>" : "") +
+      (avItem ? '<a class="btn btn-avito" href="' + esc(avItem) + '" target="_blank" rel="noopener" data-goal="avito_click">Купить на Авито</a>' :
+        avProf ? '<a class="btn btn-avito" href="' + esc(avProf) + '" target="_blank" rel="noopener" data-goal="avito_profile">Заказать через Авито</a>' : "") +
       '<button class="btn btn-ghost" data-act="copy">Скопировать заявку</button>';
     $("#modal").innerHTML = '<div class="scrim" data-act="close-modal"><div class="modal" role="dialog" aria-modal="true" aria-label="' + esc(p.title) + '">' +
       '<div class="gal">' + photoBox(p, idx, true) + thumbs + "</div>" +
@@ -342,6 +349,8 @@
       '<datalist id="cond-list"><option value="Новое с биркой"><option value="Отличное"><option value="Хорошее"><option value="Винтаж"><option value="Кастом"><option value="Есть дефект"></datalist>' +
       fld("Описание", 'data-pf="description"', p.description, "textarea") +
       fld("Ссылка на пост в канале", 'data-pf="postUrl"', p.postUrl, "url", "Необязательно. На сайте появится ссылка «Открыть пост в канале».") +
+      fld("Ссылка для кнопки «Купить в Telegram»", 'data-pf="tgUrl"', p.tgUrl || "", "url", "Необязательно. Если пусто — кнопка ведёт на общий контакт для заказа из раздела «Ссылки».") +
+      fld("Ссылка на объявление на Авито", 'data-pf="avitoUrl"', p.avitoUrl || "", "url", "Необязательно. Появится кнопка «Купить на Авито». Если пусто — кнопка ведёт на ваш профиль Авито (если он указан в «Ссылках»).") +
       '<label class="chk"><input type="checkbox" id="f-isnew" data-pfb="isNew"' + (p.isNew ? " checked" : "") + "> Отметить как новинку</label>" +
       '<div class="fld"><label>Фото (до 10, первое — главное)</label><div class="photos">' + photos +
       ((p.photos || []).length < 10 ? '<label class="up" aria-label="Добавить фото">+<input type="file" accept="image/*" multiple id="f-photos" data-upload="1"></label>' : "") +
@@ -369,6 +378,7 @@
     var L = state.links;
     return fld("Telegram-канал", 'data-lf="telegram"', L.telegram, "url", "Кнопки «Telegram» и «Открыть канал»") +
       fld("Куда писать для заказа", 'data-lf="order"', L.order, "url", "Сюда ведёт кнопка «Купить в Telegram». Например: t.me/username") +
+      fld("Профиль на Авито", 'data-lf="avito"', L.avito || "", "url", "Ссылка внизу сайта, в блоке «О магазине» и на кнопке «Заказать через Авито», если у вещи нет своего объявления.") +
       '<div class="sep"></div><div class="fld"><label>Дополнительные ссылки (блок «О магазине»)</label></div>' +
       (L.extra || []).map(function (e, i) {
         return '<div class="exl">' + fld("Название", 'data-ex="' + i + '" data-exf="label"', e.label) + fld("Ссылка", 'data-ex="' + i + '" data-exf="url"', e.url, "url") + '<button class="ib danger" data-exdel="' + i + '" aria-label="Удалить ссылку">✕</button></div>';
@@ -468,7 +478,7 @@
     if (act === "publish") { publish(); return; }
     if (act === "revert") { state = clone(saved); ui.dirty = false; ui.editing = null; ui.msg = ""; renderSite(); renderAdmin(); renderModal(); return; }
     if (act === "padd") {
-      var np = { id: "p" + Date.now().toString(36), title: "", brand: "", size: "", condition: "", price: "", oldPrice: "", category: ui.cat !== "all" ? ui.cat : (state.categories[0] ? state.categories[0].id : ""), status: "available", isNew: true, description: "", postUrl: "", photos: [] };
+      var np = { id: "p" + Date.now().toString(36), title: "", brand: "", size: "", condition: "", price: "", oldPrice: "", category: ui.cat !== "all" ? ui.cat : (state.categories[0] ? state.categories[0].id : ""), status: "available", isNew: true, description: "", postUrl: "", tgUrl: "", avitoUrl: "", photos: [] };
       state.products.unshift(np); ui.editing = np.id; changed(true); var f = $('[data-pf="title"]'); if (f) f.focus(); return;
     }
     if (act === "pback") { ui.editing = null; renderAdmin(); return; }
