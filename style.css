@@ -320,3 +320,4 @@ footer .flinks a:hover{color:var(--indigo)}
 html,body{overflow-x:clip}
 .hero::before{right:0}
 body{margin:0}
+.hero h1{font-size:clamp(30px,8vw,100px);max-width:none}
