@@ -321,3 +321,18 @@ html,body{overflow-x:clip}
 .hero::before{right:0}
 body{margin:0}
 .hero h1{font-size:clamp(30px,8vw,100px);max-width:none}
+
+/* v3: no progress bar; hero collapse/overlap on scroll */
+.top::after{content:none!important;display:none!important}
+.hero{position:sticky;top:64px;z-index:1}
+main > section,.marquee{position:relative;z-index:3;background:var(--paper)}
+.marquee{background:var(--indigo)}
+#catalog{border-radius:34px 34px 0 0;box-shadow:0 -40px 80px -30px rgba(0,0,0,.9);margin-top:-6px}
+.sc .hero h1{transform-origin:left top;transform:scale(calc(1 - var(--p,0) * .14));filter:blur(calc(var(--p,0) * 7px));opacity:calc(1 - var(--p,0) * .85)}
+.sc .hero h1 .w{transform:translateY(calc(var(--p,0) * var(--i,0) * -.62em));opacity:calc(1 - var(--p,0) * var(--i,0) * .12)}
+.sc .hero .eyebrow{opacity:calc(1 - var(--p,0) * 2);transform:translateY(calc(var(--p,0) * -30px))}
+.sc .hero p{opacity:calc(1 - var(--p,0) * 1.8);transform:translateY(calc(var(--p,0) * -70px))}
+.sc .hero .ctas{opacity:calc(1 - var(--p,0) * 2);transform:translateY(calc(var(--p,0) * -110px))}
+.sc .hero .facts{opacity:calc(1 - var(--p,0) * 2.2);transform:translateY(calc(var(--p,0) * -150px))}
+.sc .hero::before{opacity:calc(1 - var(--p,0))}
+@media (prefers-reduced-motion: reduce){.hero{position:relative;top:auto}}

@@ -201,7 +201,25 @@
     if (IS_ADMIN || typeof IntersectionObserver === "undefined") return;
     var root = document.documentElement;
     if (!root.classList.contains("rv")) { root.classList.add("rv"); setTimeout(function () { root.classList.add("rv-done"); }, 1800); }
+    if (!root.__sc && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      root.__sc = 1;
+      var tick = false;
+      var upd = function () {
+        tick = false;
+        var h = document.querySelector("#site .hero"); if (!h) return;
+        var hh = h.offsetHeight, top = Math.min(64, window.innerHeight - hh);
+        h.style.top = top + "px";
+        var p = Math.max(0, Math.min(1, (window.scrollY - Math.max(0, -top)) / (hh * 0.85)));
+        h.style.setProperty("--p", p.toFixed(3));
+      };
+      window.addEventListener("scroll", function () { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true });
+      window.addEventListener("resize", upd);
+      window.__dlUpd = upd;
+      setTimeout(function () { root.classList.add("sc"); upd(); }, 1850);
+      upd();
+    }
     if (!io) io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -6% 0px" });
+    if (window.__dlUpd) window.__dlUpd();
     var n = 0;
     document.querySelectorAll("#site .card, #site .step, #site .box, #site .qa, #site .lk, #site .sec-head, #site .filters").forEach(function (el) {
       if (el.hasAttribute("data-rv")) return;
