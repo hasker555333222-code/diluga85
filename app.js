@@ -51,7 +51,8 @@
     (state.products || []).forEach(function (p) { String(p.brand || "").split("×").forEach(function (b) { b = b.trim(); var k = b.toLowerCase(); if (b && k !== "diluga" && !seen[k]) { seen[k] = 1; words.push(b); } }); });
     words = words.slice(0, 14).concat(["Vintage", "Original", "Custom by diluga"]);
     var row = words.map(function (w) { return "<span>" + esc(w) + "</span>"; }).join("");
-    return '<div class="marquee" aria-hidden="true"><div class="mq">' + row + row + "</div></div>";
+    var row2 = words.slice().reverse().map(function (w) { return "<span>" + esc(w) + "</span>"; }).join("");
+    return '<div class="mqw" aria-hidden="true"><div class="marquee m2"><div class="mq">' + row2 + row2 + row2 + '</div></div><div class="marquee m1"><div class="mq">' + row + row + row + "</div></div></div>";
   }
   function siteHTML(state, ui) {
     ui = ui || { cat: "all", onlyAvail: false };
@@ -85,7 +86,7 @@
     return '<header class="top"><div class="wrap"><a class="logo" href="#catalog">' + esc(s.shopName) + '</a>' +
       '<nav class="nav"><a href="#catalog">Каталог</a><a href="#how">Как купить</a><a href="#delivery">Доставка</a><a href="#faq">Вопросы</a><a href="#about">О нас</a></nav>' +
       (tg ? '<a class="btn btn-primary btn-sm" href="' + esc(tg) + '" target="_blank" rel="noopener" data-goal="tg_channel">Telegram</a>' : "") + "</div></header>" +
-      '<main><div class="wrap hero"><div class="eyebrow">' + esc(s.heroEyebrow) + "</div><h1>" + String(s.heroTitle || "").split(/\s+/).filter(Boolean).map(function (w, i) { return '<span class="w" style="--i:' + i + '">' + esc(w) + "</span>"; }).join(" ") + "</h1><p>" + esc(s.heroText) + '</p>' +
+      '<main><div class="wrap hero"><div class="hero-bg" aria-hidden="true">DILUGA85</div><div class="eyebrow">' + esc(s.heroEyebrow) + "</div><h1>" + String(s.heroTitle || "").split(/\s+/).filter(Boolean).map(function (w, i) { return '<span class="w" style="--i:' + i + '">' + esc(w) + "</span>"; }).join(" ") + "</h1><p>" + esc(s.heroText) + '</p>' +
       '<div class="ctas"><a class="btn btn-primary" href="#catalog">Смотреть каталог</a>' + (tg ? '<a class="btn btn-ghost" href="' + esc(tg) + '" target="_blank" rel="noopener" data-goal="tg_channel">Открыть канал</a>' : "") + "</div>" +
       '<div class="facts"><span class="fact">' + avail + " " + plural(avail, "вещь", "вещи", "вещей") + ' в наличии</span><span class="fact">' + esc(s.footerNote) + '</span><span class="fact">Отправка в день оплаты</span></div></div>' + marqueeHTML(state) +
       '<section id="catalog" class="sec"><div class="wrap"><div class="sec-head"><div><h2>' + esc(s.catalogTitle) + '</h2><p class="note" style="margin:6px 0 0">' + esc(s.catalogNote) + (s.updatedAt ? " Каталог обновлён " + esc(ruDate(s.updatedAt)) + "." : "") + '</p></div>' +
@@ -197,11 +198,69 @@
 
   function renderSite() { var el = $("#site"); if (el && state) { el.innerHTML = siteHTML(state, ui); reveal(); } }
   var io = null;
+  function scramble(el) {
+    if (!el || el.__scr) return; el.__scr = 1;
+    var txt = el.textContent, chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&@$*+0123456789", f = 0, total = 22;
+    (function step() {
+      var k = Math.floor(f / total * txt.length), out = "";
+      for (var i = 0; i < txt.length; i++) out += i < k || txt[i] === " " ? esc(txt[i]) : '<span class="scr">' + chars[Math.floor(Math.random() * chars.length)] + "</span>";
+      el.innerHTML = out;
+      if (++f <= total) setTimeout(step, 38); else el.textContent = txt;
+    })();
+  }
+  function fx() {
+    if (fx.done || IS_ADMIN) return; fx.done = 1;
+    var root = document.documentElement, fine = !!(window.matchMedia && matchMedia("(pointer:fine)").matches);
+    try {
+      if (!sessionStorage.getItem("dl-intro")) {
+        sessionStorage.setItem("dl-intro", "1");
+        var c = document.createElement("div"); c.className = "intro"; c.setAttribute("aria-hidden", "true");
+        c.innerHTML = '<div class="intro-in"><span>DILUGA</span><span>85</span></div>';
+        document.body.appendChild(c);
+        setTimeout(function () { c.classList.add("go"); }, 1000);
+        setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 2100);
+      }
+    } catch (e) {}
+    if (fine) {
+      var cur = document.createElement("div"); cur.className = "cur"; document.body.appendChild(cur); root.classList.add("has-cur");
+      var x = -100, y = -100, cx = -100, cy = -100;
+      (function loop() { cx += (x - cx) * 0.2; cy += (y - cy) * 0.2; cur.style.transform = "translate(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px)"; requestAnimationFrame(loop); })();
+      document.addEventListener("mousemove", function (e) {
+        x = e.clientX; y = e.clientY;
+        var t = e.target.closest ? e.target : null;
+        var card = t && t.closest("#site .card"), hot = t && t.closest("a,button,label,input");
+        cur.classList.toggle("view", !!card); cur.classList.toggle("big", !card && !!hot);
+        document.querySelectorAll("#site .card.tilt").forEach(function (k) { if (k !== card) { k.classList.remove("tilt"); } });
+        if (card) {
+          var r = card.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+          card.classList.add("tilt");
+          card.style.setProperty("--rx", (-py * 16).toFixed(2) + "deg"); card.style.setProperty("--ry", (px * 16).toFixed(2) + "deg");
+          card.style.setProperty("--gx", ((px + 0.5) * 100).toFixed(1) + "%"); card.style.setProperty("--gy", ((py + 0.5) * 100).toFixed(1) + "%");
+        }
+        var b = t && t.closest("#site .btn, #modal .btn");
+        document.querySelectorAll(".btn.mag").forEach(function (k) { if (k !== b) k.classList.remove("mag"); });
+        if (b) { var q = b.getBoundingClientRect(); b.classList.add("mag"); b.style.setProperty("--mx", ((e.clientX - q.left - q.width / 2) * 0.35).toFixed(1) + "px"); b.style.setProperty("--my", ((e.clientY - q.top - q.height / 2) * 0.45).toFixed(1) + "px"); }
+        var hero = document.querySelector("#site .hero");
+        if (hero) { hero.style.setProperty("--mx", (e.clientX / innerWidth - 0.5).toFixed(3)); hero.style.setProperty("--my", (e.clientY / innerHeight - 0.5).toFixed(3)); }
+      }, { passive: true });
+      document.addEventListener("mouseleave", function () { x = y = -100; });
+    }
+    var last = window.scrollY, v = 0, off = 0;
+    window.addEventListener("scroll", function () { v = Math.min(80, v + Math.abs(window.scrollY - last)); last = window.scrollY; }, { passive: true });
+    (function mq() {
+      off += 0.7 + v * 0.35; v *= 0.9;
+      document.querySelectorAll("#site .mqw .mq").forEach(function (m, i) {
+        var w = m.scrollWidth / 3; if (!w) return;
+        var o = off % w; m.style.transform = "translate3d(" + (i % 2 ? -o : -(w - o)) + "px,0,0)";
+      });
+      requestAnimationFrame(mq);
+    })();
+  }
   function reveal() {
     if (IS_ADMIN || typeof IntersectionObserver === "undefined") return;
     var root = document.documentElement;
     if (!root.classList.contains("rv")) { root.classList.add("rv"); setTimeout(function () { root.classList.add("rv-done"); }, 1800); }
-    if (!root.__sc && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+    if (!root.__sc) {
       root.__sc = 1;
       var tick = false;
       var upd = function () {
@@ -218,8 +277,9 @@
       setTimeout(function () { root.classList.add("sc"); upd(); }, 1850);
       upd();
     }
-    if (!io) io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -6% 0px" });
+    if (!io) io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); if (e.target.classList.contains("sec-head")) scramble(e.target.querySelector("h2")); } }); }, { rootMargin: "0px 0px -6% 0px" });
     if (window.__dlUpd) window.__dlUpd();
+    fx();
     var n = 0;
     document.querySelectorAll("#site .card, #site .step, #site .box, #site .qa, #site .lk, #site .sec-head, #site .filters").forEach(function (el) {
       if (el.hasAttribute("data-rv")) return;
