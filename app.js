@@ -143,7 +143,7 @@
       "</head>\n<body>\n" +
       '<div id="site">' + siteHTML(state) + "</div>\n<div id=\"modal\"></div>\n" +
       '<script type="application/json" id="shop-data">' + jsonForScript(state) + "<\/script>\n" +
-      '<script src="app.js?v=' + v + '"><\/script>\n</body>\n</html>\n';
+      '<script src="chat.js?v=' + v + '"><\/script>\n<script src="app.js?v=' + v + '"><\/script>\n</body>\n</html>\n';
   }
   function buildSitemap(state) {
     var site = (state.settings.siteUrl || "").replace(/\/$/, ""); if (!site) return "";
@@ -432,8 +432,9 @@
     var el = $("#admin"); if (!el) return;
     if (!ui.admin) { el.innerHTML = ""; document.body.classList.remove("with-drawer"); return; }
     document.body.classList.add("with-drawer");
-    var tabs = [["products", "Товары"], ["texts", "Тексты"], ["links", "Ссылки"], ["cats", "Категории"], ["seo", "SEO"]];
-    var body = ui.tab === "products" ? (ui.editing ? productForm(byId(ui.editing)) : productList()) :
+    var tabs = [["products", "Товары"], ["chats", "Чаты"], ["orders", "Заказы"], ["texts", "Тексты"], ["links", "Ссылки"], ["cats", "Категории"], ["seo", "SEO"]];
+    var sup = ui.tab === "chats" || ui.tab === "orders";
+    var body = sup ? '<div id="sup"></div>' : ui.tab === "products" ? (ui.editing ? productForm(byId(ui.editing)) : productList()) :
       ui.tab === "texts" ? textsForm() : ui.tab === "links" ? linksForm() : ui.tab === "cats" ? catsForm() : seoForm();
     el.innerHTML = '<aside class="drawer" aria-label="Админка"><div class="dh"><b>Админка</b><span class="hint">' + state.products.length + ' товаров</span><button class="ib" data-act="logout" style="margin-left:auto">Выйти</button></div>' +
       '<div class="tabs" role="tablist">' + tabs.map(function (t) { return '<button role="tab" data-tab="' + t[0] + '" aria-selected="' + (ui.tab === t[0]) + '">' + t[1] + "</button>"; }).join("") + "</div>" +
@@ -441,6 +442,7 @@
       '<div class="df"><div class="msg ' + ui.msgKind + '" id="admin-msg">' + esc(ui.msg || (ui.dirty ? "Есть несохранённые изменения. Посетители увидят их после сохранения." : "Все изменения сохранены.")) + "</div>" +
       '<button class="btn btn-primary" data-act="publish"' + (ui.busy || !ui.dirty ? " disabled" : "") + ">" + (ui.busy ? "Сохраняю…" : "Сохранить на сайт") + "</button>" +
       '<button class="btn btn-ghost" data-act="revert"' + (ui.busy || !ui.dirty ? " disabled" : "") + ">Отменить изменения</button></div></aside>";
+    if (window.DilugaSupport) window.DilugaSupport.mount(sup ? ui.tab : null, sup ? $("#sup") : null);
   }
   function productList() {
     var rows = state.products.map(function (p, i) {
@@ -563,7 +565,10 @@
     gh = { owner: c.owner, repo: c.repo, branch: c.branch || "main", token: c.token };
     $("#site").innerHTML = '<div class="login"><p class="msg">Загружаю каталог…</p></div>';
     api("").then(function (r) { gh.branch = c.branch || r.default_branch || "main"; return loadFromRepo(); }).then(function (data) {
-      cfgSave(gh); state = data; saved = clone(data); ui.admin = true; renderSite(); renderAdmin();
+      cfgSave(gh); state = data; saved = clone(data); ui.admin = true;
+      var ht = window.DilugaSupport && window.DilugaSupport.hashTab(); if (ht) ui.tab = ht;
+      renderSite(); renderAdmin();
+      if (window.DilugaSupport) window.DilugaSupport.badgeLoop();
     }, function (e) {
       gh = null;
       renderLogin(e.status === 401 ? "Токен не подходит. Проверьте, что скопировали его целиком." : e.status === 404 ? "Хранилище не найдено или у токена нет к нему доступа." : "Не получилось загрузить каталог. Проверьте данные и интернет.", "err");

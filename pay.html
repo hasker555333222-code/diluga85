@@ -54,6 +54,13 @@
 .out{font-family:var(--mono);font-size:13px;word-break:break-all;background:var(--paper);padding:10px;border-radius:8px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
 .toast.on{opacity:1}
+.cf-row{display:grid;grid-template-columns:160px 1fr;gap:10px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0 0}
+.chk input{margin-top:4px}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.hint.err{color:var(--danger)}
+.ok-box{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--surface));margin:0 0 4px}
+@media (max-width:640px){.cf-row{grid-template-columns:1fr}}
 @media (max-width:640px){.qrwrap{grid-template-columns:1fr;justify-items:center}.req{grid-template-columns:1fr auto}.req dt{grid-column:1/-1;margin-top:6px}}
 @media (hover:none) and (pointer:coarse){.mobile-only{display:block}}
 </style>
@@ -63,6 +70,7 @@
 <main class="pay" id="app"><p class="lead">Загружаем заказ…</p></main>
 <div class="toast" id="toast"></div>
 <script src="qrcode.js"></script>
+<script src="chat.js"></script>
 <script>
 (function () {
   "use strict";
@@ -118,6 +126,21 @@
     for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (qr.isDark(r, c)) x.fillRect((c + q) * s, (r + q) * s, s, s);
     x.font = "bold 26px sans-serif"; x.textAlign = "center"; x.fillText(caption, w / 2, w + 40);
     return cv.toDataURL("image/png");
+  }
+
+  function hasApi() { return !!(window.DilugaSupport && window.DilugaSupport.api()); }
+  function contactForm(no) {
+    var done = false; try { done = localStorage.getItem("diluga-paid-" + no) === "1"; } catch (x) {}
+    if (done) return '<div class="pbox ok-box">Контакты по заказу ' + esc(no) + " уже отправлены. Если что-то изменилось — напишите в чат или Telegram.</div>";
+    return '<p style="margin:0 0 12px">Оплатили? Оставьте контакты — проверим поступление и напишем, когда отправим заказ.</p>' +
+      '<form id="cf" class="cf"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+      '<label class="fld"><span>Как к вам обращаться</span><input name="name" maxlength="80" autocomplete="name" required></label>' +
+      '<div class="cf-row"><label class="fld"><span>Где связаться</span><select name="method">' + ["Telegram", "WhatsApp", "Телефон", "Email", "ВКонтакте"].map(function (m) { return "<option>" + m + "</option>"; }).join("") + "</select></label>" +
+      '<label class="fld"><span>Ник, номер или адрес</span><input name="contact" maxlength="160" required placeholder="@username или +7…"></label></div>' +
+      '<label class="fld"><span>Доставка (необязательно)</span><input name="address" maxlength="600" placeholder="Город, СДЭК / Почта / Boxberry, адрес или ПВЗ"></label>' +
+      '<label class="fld"><span>Комментарий (необязательно)</span><input name="comment" maxlength="600"></label>' +
+      '<label class="chk"><input type="checkbox" name="consent" required> <span>Согласен на <a href="privacy.html" target="_blank">обработку персональных данных</a> для доставки заказа</span></label>' +
+      '<div class="btns"><button class="btn btn-primary" type="submit">Я оплатил — отправить контакты</button></div><p class="hint" id="cf-msg" aria-live="polite"></p></form>';
   }
 
   function orderNo() {
@@ -188,8 +211,9 @@
       "<dt>Сумма</dt><dd>" + money(total) + '</dd><dd><button class="cp" data-cp="' + total + '" data-l="Сумма">Копировать</button></dd>' +
       "</dl></section>" +
 
-      '<section class="pbox"><h2>После оплаты</h2><p style="margin:0">Нажмите кнопку ниже и пришлите скриншот чека — подтвердим оплату и отправим заказ.</p>' +
-      '<div class="btns"><a class="btn btn-primary" id="paid" href="' + esc(PAY.contact + "?text=" + encodeURIComponent(paidMsg)) + '" target="_blank" rel="noopener">Я оплатил — написать в Telegram</a>' +
+      '<section class="pbox" id="after"><h2>После оплаты</h2>' + (hasApi() ? contactForm(no) :
+      '<p style="margin:0">Нажмите кнопку ниже и пришлите скриншот чека — подтвердим оплату и отправим заказ.</p>') +
+      '<div class="btns"><a class="btn ' + (hasApi() ? "btn-ghost" : "btn-primary") + '" id="paid" href="' + esc(PAY.contact + "?text=" + encodeURIComponent(paidMsg)) + '" target="_blank" rel="noopener">' + (hasApi() ? "Или написать в Telegram" : "Я оплатил — написать в Telegram") + "</a>" +
       '<button class="btn btn-ghost" data-cp="' + esc(paidMsg) + '" data-l="Сообщение">Скопировать сообщение</button></div>' +
       '<p class="hint">Вещи в одном экземпляре. Если вещь успели купить раньше, вернём деньги тем же способом.</p></section>' +
 
@@ -204,6 +228,18 @@
       this.href = png; goal("pay_qr_save");
     });
     document.getElementById("paid").addEventListener("click", function () { goal("pay_done_click"); });
+    var cf = document.getElementById("cf");
+    if (cf) cf.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var btn = cf.querySelector("button[type=submit]"), msg = document.getElementById("cf-msg");
+      btn.disabled = true; msg.textContent = "Отправляю…"; msg.className = "hint";
+      window.DilugaSupport.call({ a: "order.contact", order: no, sum: total, items: title, name: cf.name.value, method: cf.method.value, contact: cf.contact.value, address: cf.address.value, comment: cf.comment.value, consent: cf.consent.checked, website: cf.website.value })
+        .then(function () {
+          goal("pay_contacts_sent");
+          try { localStorage.setItem("diluga-paid-" + no, "1"); } catch (x) {}
+          cf.outerHTML = '<div class="pbox ok-box"><b>Спасибо!</b> Проверим поступление по заказу ' + esc(no) + " и свяжемся с вами: " + esc(cf.method.value + " " + cf.contact.value) + ".</div>";
+        }, function (err) { btn.disabled = false; msg.textContent = (err.message || "Не отправилось") + ". Напишите нам в Telegram — кнопка ниже."; msg.className = "hint err"; });
+    });
     goal("pay_open");
   }
 
