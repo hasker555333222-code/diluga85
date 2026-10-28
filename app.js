@@ -322,7 +322,8 @@
       .filter(function (r) { return r[1]; }).map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
     var thumbs = (p.photos || []).length > 1 ? '<div class="thumbs">' + p.photos.map(function (src, i) { return '<button data-ph="' + i + '" aria-current="' + (i === idx) + '" aria-label="Фото ' + (i + 1) + '"><img src="' + esc(src) + '" alt=""></button>'; }).join("") + "</div>" : "";
     var buy = p.status === "sold" ? '<span class="note">Эта вещь уже продана. Похожие ищите в каталоге и в канале.</span>' :
-      (order ? '<a class="btn btn-primary" href="' + esc(order) + '" target="_blank" rel="noopener" data-goal="buy_click">' + (p.status === "reserved" ? "Спросить про бронь" : "Купить в Telegram") + "</a>" : "") +
+      (p.status === "available" && +p.price > 0 ? '<a class="btn btn-primary" href="pay.html?id=' + encodeURIComponent(p.id) + '" target="_blank" rel="noopener" data-goal="pay_click">Оплатить по QR</a>' : "") +
+      (order ? '<a class="btn ' + (p.status === "available" && +p.price > 0 ? "btn-ghost" : "btn-primary") + '" href="' + esc(order) + '" target="_blank" rel="noopener" data-goal="buy_click">' + (p.status === "reserved" ? "Спросить про бронь" : "Купить в Telegram") + "</a>" : "") +
       (avItem ? '<a class="btn btn-avito" href="' + esc(avItem) + '" target="_blank" rel="noopener" data-goal="avito_click">Купить на Авито</a>' :
         avProf ? '<a class="btn btn-avito" href="' + esc(avProf) + '" target="_blank" rel="noopener" data-goal="avito_profile">Заказать через Авито</a>' : "") +
       '<button class="btn btn-ghost" data-act="copy">Скопировать заявку</button>';

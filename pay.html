@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Оплата заказа — diluga85</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0b0b0c">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="style.css">
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,"script","https://mc.yandex.ru/metrika/tag.js?id=113803023", "ym");ym(113803023, "init", {webvisor:true, clickmap:true, referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/113803023" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+<style>
+.pay{max-width:760px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-left,0px)) 56px}
+.pay h1{font-family:var(--display);font-size:clamp(26px,5vw,36px);font-weight:400;margin:6px 0 4px}
+.pay .lead{color:var(--muted);margin:0 0 22px}
+.pbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.pbox h2{font-size:17px;margin:0 0 12px}
+.items{list-style:none;margin:0;padding:0}
+.items li{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.items li:last-child{border-bottom:0}
+.items img{width:48px;height:60px;object-fit:cover;border-radius:8px;background:var(--paper);flex:none}
+.items .nm{flex:1;min-width:0;font-weight:600}
+.items .nm small{display:block;color:var(--muted);font-weight:500}
+.items .pr{font-family:var(--mono);font-weight:600;white-space:nowrap}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:1.5px solid var(--ink)}
+.total b{font-family:var(--mono);font-size:24px}
+.ordno{font-family:var(--mono);background:var(--indigo-soft);border-radius:6px;padding:2px 8px}
+.qrwrap{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
+.qr{background:#fff;padding:12px;border-radius:12px;width:min(260px,70vw);line-height:0;border:1px solid var(--line)}
+.qr svg{width:100%;height:auto;display:block}
+.steps{margin:0;padding-left:20px}
+.steps li{margin-bottom:6px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.req{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;margin:0}
+.req dt{color:var(--muted);font-size:14px}
+.req dd{margin:0;font-family:var(--mono);font-size:14px;word-break:break-all}
+.cp{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer}
+.cp:hover{background:var(--paper)}
+.hint{color:var(--muted);font-size:14px;margin:10px 0 0}
+.warn{background:color-mix(in srgb,var(--warn) 14%,var(--surface));border-color:var(--warn)}
+.mobile-only{display:none}
+.fld{display:block;margin-bottom:12px}
+.fld span{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
+.fld input,.fld select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper)}
+.out{font-family:var(--mono);font-size:13px;word-break:break-all;background:var(--paper);padding:10px;border-radius:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+.toast.on{opacity:1}
+@media (max-width:640px){.qrwrap{grid-template-columns:1fr;justify-items:center}.req{grid-template-columns:1fr auto}.req dt{grid-column:1/-1;margin-top:6px}}
+@media (hover:none) and (pointer:coarse){.mobile-only{display:block}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="logo" href="/">diluga85</a><nav class="nav"><a href="/#catalog">Каталог</a><a href="/#delivery">Доставка</a></nav></div></header>
+<main class="pay" id="app"><p class="lead">Загружаем заказ…</p></main>
+<div class="toast" id="toast"></div>
+<script src="qrcode.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ===== Реквизиты получателя. Меняйте только здесь. ===== */
+  var PAY = {
+    name: "Мартюшев Даниил Геннадьевич",
+    account: "40817810411112833582",
+    bic: "044525068",
+    bankName: "ОЗОН Банк",
+    corrAccount: "30101810645374525068",
+    sbpPhone: "+7 995 691-71-36",
+    sbpBank: "Озон Банк",
+    contact: "https://t.me/eil_mart0"   // куда писать «Я оплатил»
+  };
+  /* ====================================================== */
+
+  var $app = document.getElementById("app");
+  var qs = new URLSearchParams(location.search);
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function money(n) { return String(Math.round(+n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ₽"; }
+  function num(v) { v = String(v || "").replace(",", ".").replace(/[^\d.]/g, ""); var n = Math.round(+v); return isFinite(n) && n > 0 ? n : 0; }
+  function sbpName() { var p = PAY.name.split(/\s+/); return p.length >= 3 ? p[1] + " " + p[2] + " " + p[0].charAt(0) + "." : PAY.name; } // как покажет банк: «Даниил Геннадьевич М.»
+  function goal(g) { try { window.ym && ym(113803023, "reachGoal", g); } catch (e) {} }
+  function toast(t) { var el = document.getElementById("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove("on"); }, 1600); }
+  function copy(text, label) {
+    function ok() { toast((label || "Текст") + " скопирован"); }
+    function fallback() { var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch (e) { prompt("Скопируйте:", text); } document.body.removeChild(ta); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+  }
+
+  /* Платёжный QR по ГОСТ Р 56042-2014 (тот же формат, что на квитанциях). ST00012 = UTF-8. Сумма в копейках. */
+  function payload(sum, purpose) {
+    var f = [["Name", PAY.name], ["PersonalAcc", PAY.account], ["BankName", PAY.bankName], ["BIC", PAY.bic], ["CorrespAcc", PAY.corrAccount], ["Sum", String(sum * 100)], ["Purpose", purpose]];
+    return "ST00012|" + f.map(function (p) { return p[0] + "=" + String(p[1]).replace(/\|/g, " "); }).join("|");
+  }
+  function qrModules(text) {
+    var qr = new QRCode(-1, QRErrorCorrectLevel.M);
+    qr.addData(unescape(encodeURIComponent(text))); // UTF-8 байты
+    qr.make();
+    return qr;
+  }
+  function qrSvg(qr) {
+    var n = qr.getModuleCount(), q = 2, d = "";
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (qr.isDark(r, c)) d += "M" + (c + q) + " " + (r + q) + "h1v1h-1z";
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + (n + q * 2) + " " + (n + q * 2) + '" shape-rendering="crispEdges" role="img" aria-label="QR-код для оплаты"><rect width="100%" height="100%" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
+  }
+  function qrPng(qr, caption) {
+    var n = qr.getModuleCount(), s = 12, q = 4, w = (n + q * 2) * s, h = w + 70;
+    var cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+    var x = cv.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.fillStyle = "#000";
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (qr.isDark(r, c)) x.fillRect((c + q) * s, (r + q) * s, s, s);
+    x.font = "bold 26px sans-serif"; x.textAlign = "center"; x.fillText(caption, w / 2, w + 40);
+    return cv.toDataURL("image/png");
+  }
+
+  function orderNo() {
+    var o = (qs.get("o") || "").replace(/[^\w-]/g, "").slice(0, 16);
+    if (!o) {
+      o = "D" + String(Math.floor(1000 + Math.random() * 9000));
+      qs.set("o", o);
+      try { history.replaceState(null, "", location.pathname + "?" + qs.toString()); } catch (e) {}
+    }
+    return o;
+  }
+
+  function loadShop() {
+    return fetch("index.html", { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (html) {
+      var m = html.match(/<script type="application\/json" id="shop-data">([\s\S]*?)<\/script>/);
+      return m ? JSON.parse(m[1]) : { products: [] };
+    }).catch(function () { return { products: [] }; });
+  }
+
+  /* ---------- Страница оплаты ---------- */
+  function renderPay(shop) {
+    var ids = (qs.get("id") || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+    var items = [], missing = [], sold = [];
+    ids.forEach(function (id) {
+      var p = (shop.products || []).filter(function (x) { return x.id === id; })[0];
+      if (!p) missing.push(id); else if (p.status === "sold") sold.push(p); else items.push(p);
+    });
+    var custom = num(qs.get("sum")), dlv = num(qs.get("dlv"));
+    var itemsSum = items.reduce(function (a, p) { return a + num(p.price); }, 0);
+    var total = (ids.length ? itemsSum : custom) + dlv;
+
+    if (!ids.length && !custom) return renderBuilder(shop);
+    if (sold.length && !items.length) {
+      $app.innerHTML = '<div class="eyebrow">оплата</div><h1>Вещь уже продана</h1><div class="pbox warn"><p style="margin:0">' + sold.map(function (p) { return esc([p.brand, p.title].filter(Boolean).join(" ")); }).join(", ") + ' — уже нет в наличии. Похожие вещи ищите <a href="/#catalog">в каталоге</a>.</p></div>';
+      return;
+    }
+    if (!total) { $app.innerHTML = '<h1>Не удалось найти заказ</h1><p class="lead">Ссылка устарела или товар снят с продажи. Напишите нам: <a href="' + esc(PAY.contact) + '">' + esc(PAY.contact.replace("https://", "")) + "</a></p>"; return; }
+
+    var no = orderNo();
+    var title = items.length ? items.map(function (p) { return [p.brand, p.title].filter(Boolean).join(" ") + (p.size ? " (" + p.size + ")" : ""); }).join("; ") : (qs.get("t") || "").slice(0, 80);
+    var purpose = ("Заказ " + no + (title ? ": " + title : "")).slice(0, 200);
+    var qr = qrModules(payload(total, purpose));
+    var paidMsg = "Здравствуйте! Оплатил заказ " + no + " на " + total + " ₽" + (title ? " — " + title : "") + ". Прикладываю чек.";
+
+    var rows = items.map(function (p) {
+      var img = p.photos && p.photos[0] ? '<img src="' + esc(p.photos[0]) + '" alt="">' : "";
+      return "<li>" + img + '<div class="nm">' + esc([p.brand, p.title].filter(Boolean).join(" ")) + (p.size ? "<small>Размер " + esc(p.size) + "</small>" : "") + (p.status === "reserved" ? "<small>Бронь</small>" : "") + '</div><div class="pr">' + money(p.price) + "</div></li>";
+    }).join("");
+    if (!ids.length) rows = '<li><div class="nm">' + esc(title || "Оплата заказа") + '</div><div class="pr">' + money(custom) + "</div></li>";
+    if (dlv) rows += '<li><div class="nm">Доставка</div><div class="pr">' + money(dlv) + "</div></li>";
+
+    $app.innerHTML =
+      '<div class="eyebrow">оплата заказа</div><h1>Заказ <span class="ordno">' + esc(no) + "</span></h1>" +
+      '<p class="lead">Оплата переводом по QR-коду или по СБП. Отправим в день оплаты.</p>' +
+      (sold.length || missing.length ? '<div class="pbox warn"><p style="margin:0">Часть вещей уже продана и убрана из заказа: ' + esc(sold.map(function (p) { return p.title; }).concat(missing).join(", ")) + "</p></div>" : "") +
+      '<section class="pbox"><h2>Состав заказа</h2><ul class="items">' + rows + '</ul><div class="total"><span>К оплате</span><b>' + money(total) + "</b></div>" +
+      (!dlv ? '<p class="hint">Стоимость доставки согласуем в сообщениях. Можно оплатить сейчас только вещь, а доставку — отдельно.</p>' : "") + "</section>" +
+
+      '<section class="pbox"><h2>Оплата по QR-коду</h2><div class="qrwrap"><div class="qr">' + qrSvg(qr) + "</div><div>" +
+      '<ol class="steps"><li>Откройте приложение своего банка (Сбер, Т-Банк, ВТБ, Альфа и др.).</li><li>Выберите «Оплата по QR» / «Сканировать».</li><li>Наведите камеру — сумма и реквизиты подставятся сами.</li><li>Проверьте сумму <b>' + money(total) + "</b> и подтвердите.</li></ol>" +
+      '<p class="hint mobile-only">Открыли с телефона? Сохраните QR-картинку и выберите её из галереи в приложении банка — или переведите по номеру телефона ниже.</p>' +
+      '<div class="btns"><a class="btn btn-ghost btn-sm" id="dl" download="diluga85-' + esc(no) + '.png" href="#">Сохранить QR</a></div></div></div></section>' +
+
+      '<section class="pbox"><h2>Или перевод по СБП</h2><dl class="req">' +
+      "<dt>Телефон</dt><dd>" + esc(PAY.sbpPhone) + '</dd><dd><button class="cp" data-cp="' + esc(PAY.sbpPhone.replace(/[^\d+]/g, "")) + '" data-l="Номер">Копировать</button></dd>' +
+      "<dt>Банк получателя</dt><dd>" + esc(PAY.sbpBank) + "</dd><dd></dd>" +
+      "<dt>Получатель</dt><dd>" + esc(sbpName()) + "</dd><dd></dd>" +
+      "<dt>Сумма</dt><dd>" + money(total) + '</dd><dd><button class="cp" data-cp="' + total + '" data-l="Сумма">Копировать</button></dd>' +
+      "</dl></section>" +
+
+      '<section class="pbox"><h2>После оплаты</h2><p style="margin:0">Нажмите кнопку ниже и пришлите скриншот чека — подтвердим оплату и отправим заказ.</p>' +
+      '<div class="btns"><a class="btn btn-primary" id="paid" href="' + esc(PAY.contact + "?text=" + encodeURIComponent(paidMsg)) + '" target="_blank" rel="noopener">Я оплатил — написать в Telegram</a>' +
+      '<button class="btn btn-ghost" data-cp="' + esc(paidMsg) + '" data-l="Сообщение">Скопировать сообщение</button></div>' +
+      '<p class="hint">Вещи в одном экземпляре. Если вещь успели купить раньше, вернём деньги тем же способом.</p></section>' +
+
+      '<details class="pbox"><summary style="cursor:pointer;font-weight:700">Реквизиты для перевода вручную</summary><dl class="req" style="margin-top:12px">' +
+      [["Получатель", PAY.name], ["Счёт", PAY.account], ["БИК", PAY.bic], ["Банк", PAY.bankName], ["Корр. счёт", PAY.corrAccount], ["Назначение", purpose]].map(function (r) {
+        return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + '</dd><dd><button class="cp" data-cp="' + esc(r[1]) + '" data-l="' + esc(r[0]) + '">Копировать</button></dd>';
+      }).join("") + "</dl></details>";
+
+    var png = null;
+    document.getElementById("dl").addEventListener("click", function (e) {
+      if (!png) png = qrPng(qr, "diluga85 · " + no + " · " + total + " ₽");
+      this.href = png; goal("pay_qr_save");
+    });
+    document.getElementById("paid").addEventListener("click", function () { goal("pay_done_click"); });
+    goal("pay_open");
+  }
+
+  /* ---------- Конструктор ссылки (если открыть pay.html без параметров) ---------- */
+  function renderBuilder(shop) {
+    var avail = (shop.products || []).filter(function (p) { return p.status !== "sold" && p.price; });
+    $app.innerHTML = '<div class="eyebrow">для менеджера</div><h1>Ссылка на оплату</h1><p class="lead">Выберите вещь или введите сумму — получите ссылку для покупателя.</p>' +
+      '<section class="pbox"><label class="fld"><span>Вещь</span><select id="b-id"><option value="">— своя сумма —</option>' +
+      avail.map(function (p) { return '<option value="' + esc(p.id) + '">' + esc([p.brand, p.title].filter(Boolean).join(" ") + (p.size ? ", " + p.size : "") + " — " + p.price + " ₽") + "</option>"; }).join("") +
+      '</select></label><label class="fld" id="b-sumw"><span>Сумма, ₽</span><input id="b-sum" inputmode="numeric" placeholder="например, 3500"></label>' +
+      '<label class="fld" id="b-tw"><span>Назначение (необязательно)</span><input id="b-t" placeholder="например, 2 футболки"></label>' +
+      '<label class="fld"><span>Доставка, ₽ (необязательно)</span><input id="b-dlv" inputmode="numeric" placeholder="0"></label>' +
+      '<div class="out" id="b-out">Заполните поля</div><div class="btns"><button class="btn btn-primary btn-sm" id="b-copy">Скопировать ссылку</button><a class="btn btn-ghost btn-sm" id="b-open" target="_blank" rel="noopener" href="#">Открыть</a></div>' +
+      '<p class="hint">Несколько вещей: добавьте их id через запятую в параметр id, например pay.html?id=tg242,tg238</p></section>';
+    var link = "";
+    function upd() {
+      var id = document.getElementById("b-id").value, s = num(document.getElementById("b-sum").value), d = num(document.getElementById("b-dlv").value), t = document.getElementById("b-t").value.trim();
+      document.getElementById("b-sumw").style.display = document.getElementById("b-tw").style.display = id ? "none" : "";
+      var p = new URLSearchParams();
+      if (id) p.set("id", id); else if (s) { p.set("sum", s); if (t) p.set("t", t); }
+      if (d) p.set("dlv", d);
+      link = (id || s) ? location.origin + location.pathname + "?" + p.toString() : "";
+      document.getElementById("b-out").textContent = link || "Заполните поля";
+      document.getElementById("b-open").href = link || "#";
+    }
+    $app.addEventListener("input", upd); $app.addEventListener("change", upd);
+    document.getElementById("b-copy").addEventListener("click", function () { if (link) copy(link, "Ссылка"); });
+    upd();
+  }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-cp]"); if (!b) return;
+    copy(b.getAttribute("data-cp"), b.getAttribute("data-l"));
+  });
+
+  loadShop().then(renderPay);
+})();
+</script>
+</body>
+</html>
