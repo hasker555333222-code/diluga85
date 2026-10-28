@@ -155,7 +155,7 @@
     var p;
     if (A.tab === "orders") p = acall({ a: "admin.orders" }).then(function (r) { A.orders = r.orders; });
     else if (A.cur) p = acall({ a: "admin.chat", cid: A.cur }).then(function (r) { var ch = !A.chat || A.chat.msgs.length !== r.msgs.length || A.chat.id !== r.id; A.chat = r; return ch; });
-    else p = acall({ a: "admin.chats" }).then(function (r) { A.chats = r.chats; A.tg = { linked: r.tgLinked, token: r.tgToken }; badge(r.chats); });
+    else p = acall({ a: "admin.chats" }).then(function (r) { A.chats = r.chats; A.tg = { linked: r.tgLinked, token: r.tgToken, vk: r.vkLinked, vkName: r.vkName, vkToken: r.vkToken }; badge(r.chats); });
     p.then(function (changed) { A.err = ""; if (changed !== false) draw(); loop(A.cur ? 4000 : A.tab === "orders" ? 20000 : 8000); },
       function (e) { A.err = e.message; draw(); loop(15000); });
   }
@@ -194,7 +194,9 @@
       var t2 = el.querySelector("textarea[data-sup-draft]"); if (t2) { t2.value = A.drafts[A.cur] || ""; if (foc) t2.focus(); }
       return;
     }
-    var tg = A.tg && A.tg.token && !A.tg.linked ? '<div class="sup-info">Уведомления в Telegram не подключены. Откройте своего бота, нажмите «Старт», затем <button class="btn btn-ghost btn-sm" data-sup="tglink">Подключить</button></div>' : "";
+    var tg = !A.tg ? "" : A.tg.vk ? '<p class="hint">Уведомления ВКонтакте: ' + esc(A.tg.vkName || "подключены") + ' · <button class="btn btn-ghost btn-sm" data-sup="vklink">Переподключить</button></p>' :
+      A.tg.vkToken ? '<div class="sup-info">Уведомления ВКонтакте не подключены. Напишите своему сообществу ВК любое сообщение (например «привет»), затем <button class="btn btn-ghost btn-sm" data-sup="vklink">Подключить</button></div>' :
+      '<div class="sup-info">Уведомления не настроены: добавьте VK_TOKEN в настройках функции в Yandex Cloud.</div>';
     var list = A.chats == null ? '<p class="hint">Загружаю…</p>' : !A.chats.length ? '<p class="hint">Пока никто не писал. Кнопка «Чат» есть внизу справа на каждой странице сайта.</p>' :
       A.chats.map(function (c) {
         return '<button class="sup-it' + (c.closed ? " closed" : "") + '" data-sup-open="' + esc(c.id) + '"><span class="t"><span>' + esc(c.name || "Без имени") + "</span>" + (c.unread ? '<span class="dlc-badge">' + c.unread + "</span>" : "") + "<span>" + esc(when(c.updated)) + "</span></span>" +
@@ -223,6 +225,7 @@
       if (act === "back") { A.cur = null; A.chat = null; try { history.replaceState(null, "", location.pathname); } catch (x) {} draw(); refresh(); }
       else if (act === "close") acall({ a: "admin.close", cid: A.cur }).then(refresh, function (x) { A.err = x.message; draw(); });
       else if (act === "logout") { ls("diluga-sup-key", null); A.chats = null; draw(); }
+      else if (act === "vklink") { t.disabled = true; t.textContent = "Подключаю…"; acall({ a: "admin.vklink" }).then(function () { A.err = ""; refresh(); }, function (x) { A.err = x.message; draw(); }); }
       else if (act === "tglink") { t.disabled = true; acall({ a: "admin.tglink" }).then(function () { A.err = ""; refresh(); }, function (x) { A.err = x.message; draw(); }); }
     });
     document.addEventListener("submit", function (e) {
