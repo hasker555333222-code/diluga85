@@ -7,6 +7,7 @@
  *   ADMIN_KEY          пароль для вкладок «Чаты» и «Заказы» в админке
  *   TG_BOT_TOKEN       токен Telegram-бота для уведомлений (необязательно)
  *   TG_ADMIN_USERNAME  ник, которому бот шлёт уведомления (по умолчанию eil_mart0)
+ *   (пуш-уведомления в админку: ключи VAPID сервер создаёт сам и хранит в бакете)
  *   VK_TOKEN           ключ доступа сообщества ВКонтакте (право «Сообщения сообщества») — уведомления в ВК
  *   SITE_URL           https://diluga85.shop
  */
@@ -72,9 +73,41 @@ function vk(method, params) {
       return j.response;
     }, function (e) { if (e.code) throw e; throw Object.assign(new Error("Сервер не смог связаться с ВКонтакте. Попробуйте ещё раз."), { code: 502 }); });
 }
-function notify(text) {
+/* ---------- Web Push (пуши в установленную админку) ---------- */
+var crypto = require("crypto");
+function b64u(buf) { return Buffer.from(buf).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+function vapidOf(cfg) {
+  if (cfg.vapid && cfg.vapid.d) return false;
+  var k = crypto.generateKeyPairSync("ec", { namedCurve: "prime256v1" }), jwk = k.privateKey.export({ format: "jwk" });
+  cfg.vapid = { d: jwk.d, x: jwk.x, y: jwk.y, pub: b64u(Buffer.concat([Buffer.from([4]), Buffer.from(jwk.x, "base64"), Buffer.from(jwk.y, "base64")])) };
+  return true;
+}
+function vapidHeader(cfg, endpoint) {
+  var aud = new URL(endpoint).origin;
+  var head = b64u(JSON.stringify({ typ: "JWT", alg: "ES256" })), body = b64u(JSON.stringify({ aud: aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: SITE }));
+  var key = crypto.createPrivateKey({ key: { kty: "EC", crv: "P-256", d: cfg.vapid.d, x: cfg.vapid.x, y: cfg.vapid.y }, format: "jwk" });
+  var sig = crypto.sign("sha256", Buffer.from(head + "." + body), { key: key, dsaEncoding: "ieee-p1363" });
+  return "vapid t=" + head + "." + body + "." + b64u(sig) + ", k=" + cfg.vapid.pub;
+}
+function pushOne(cfg, sub) {
+  var ac = new AbortController(), t = setTimeout(function () { ac.abort(); }, 5000);
+  return fetch(sub.endpoint, { method: "POST", headers: { "TTL": "86400", "Urgency": "high", "Authorization": vapidHeader(cfg, sub.endpoint), "Content-Length": "0" }, signal: ac.signal })
+    .then(function (r) { clearTimeout(t); return r.status; }, function () { clearTimeout(t); return 0; });
+}
+function pushAll(cfg) {
+  var subs = cfg.subs || []; if (!subs.length || !cfg.vapid) return Promise.resolve(false);
+  return Promise.all(subs.map(function (s) { return pushOne(cfg, s); })).then(function (codes) {
+    var keep = subs.filter(function (s, i) { return codes[i] !== 404 && codes[i] !== 410; });
+    if (keep.length === subs.length) return false;
+    cfg.subs = keep; return true;
+  });
+}
+
+function notify(text, ev) {
   return store.get("config.json").then(function (cfg) {
     cfg = cfg || {}; var jobs = [];
+    cfg.lastEvent = { t: now(), title: (ev && ev.title) || "diluga85", text: str(String(text).replace(/\n\n(Ответить|Проверьте)[\s\S]*$/, ""), 600), link: (ev && ev.link) || "/admin.html#chats" };
+    jobs.push(pushAll(cfg).then(function () { return store.put("config.json", cfg); }));
     if (cfg.vkPeerId && process.env.VK_TOKEN) jobs.push(vk("messages.send", { peer_id: cfg.vkPeerId, random_id: Math.floor(Math.random() * 2e9), message: text, dont_parse_links: 1 }).catch(function (e) { console.error("vk notify", e.message); }));
     if (cfg.tgChatId) jobs.push(tg("sendMessage", { chat_id: cfg.tgChatId, text: text, disable_web_page_preview: true }));
     return Promise.all(jobs);
@@ -152,7 +185,8 @@ var actions = {
       chat.msgs.push({ t: now(), from: "u", text: text });
       chat.updated = now(); chat.unread = (chat.unread || 0) + 1; chat.closed = false;
       return saveChat(chat).then(function () {
-        return notify((isNew ? "Новый чат на сайте" : "Сообщение в чате") + (chat.name ? " — " + chat.name : "") + (chat.contact ? " (" + chat.contact + ")" : "") + ":\n" + text.slice(0, 600) + "\n\nОтветить: " + SITE + "/admin.html#chat=" + chat.id);
+        return notify((isNew ? "Новый чат на сайте" : "Сообщение в чате") + (chat.name ? " — " + chat.name : "") + (chat.contact ? " (" + chat.contact + ")" : "") + ":\n" + text.slice(0, 600) + "\n\nОтветить: " + SITE + "/admin.html#chat=" + chat.id,
+          { title: (isNew ? "Новый чат" : "Сообщение") + (chat.name ? " — " + chat.name : ""), link: "/admin.html#chat=" + chat.id });
       }).then(function () {
         var out = pub(chat); out.key = chat.key; return out;
       });
@@ -178,7 +212,7 @@ var actions = {
       all.orders.unshift(o); all.orders = all.orders.slice(0, 1000);
       return store.put("orders.json", all);
     }).then(function () {
-      return notify("Оплата: заказ " + o.no + " на " + o.sum + " ₽" + (o.items ? "\n" + o.items : "") + "\n" + [o.name, o.method + ": " + o.contact, o.address && "Адрес: " + o.address, o.comment && "Комментарий: " + o.comment].filter(Boolean).join("\n") + "\n\nПроверьте поступление по назначению платежа «Заказ " + o.no + "».\n" + SITE + "/admin.html#orders");
+      return notify("Оплата: заказ " + o.no + " на " + o.sum + " ₽" + (o.items ? "\n" + o.items : "") + "\n" + [o.name, o.method + ": " + o.contact, o.address && "Адрес: " + o.address, o.comment && "Комментарий: " + o.comment].filter(Boolean).join("\n") + "\n\nПроверьте поступление по назначению платежа «Заказ " + o.no + "».\n" + SITE + "/admin.html#orders", { title: "Оплата: заказ " + o.no + " на " + o.sum + " ₽", link: "/admin.html#orders" });
     }).then(function () {
       return { ok: true };
     });
@@ -191,7 +225,7 @@ var actions = {
       var list = Object.keys((r[0] || { chats: {} }).chats).map(function (k) { return r[0].chats[k]; });
       list.sort(function (a, b) { return a.updated < b.updated ? 1 : -1; });
       var cfg = r[1] || {};
-      return { chats: list, tgLinked: !!cfg.tgChatId, tgToken: !!process.env.TG_BOT_TOKEN, vkLinked: !!cfg.vkPeerId, vkName: cfg.vkName || "", vkToken: !!process.env.VK_TOKEN };
+      return { chats: list, tgLinked: !!cfg.tgChatId, tgToken: !!process.env.TG_BOT_TOKEN, vkLinked: !!cfg.vkPeerId, vkName: cfg.vkName || "", vkToken: !!process.env.VK_TOKEN, pushCount: (cfg.subs || []).length };
     });
   },
   "admin.chat": function (b) {
@@ -227,7 +261,31 @@ var actions = {
     });
   },
   "admin.tglink": function () { return linkTelegram(); },
-  "admin.vklink": function () { return linkVk(); }
+  "admin.vklink": function () { return linkVk(); },
+  "admin.pushkey": function () {
+    return store.get("config.json").then(function (cfg) {
+      cfg = cfg || {};
+      return (vapidOf(cfg) ? store.put("config.json", cfg) : Promise.resolve()).then(function () { return { key: cfg.vapid.pub }; });
+    });
+  },
+  "admin.pushsub": function (b) {
+    var sub = b.sub || {}, ep = String(sub.endpoint || "");
+    if (!/^https:\/\/[^\s]{10,800}$/.test(ep)) fail(400, "Некорректная подписка");
+    return store.get("config.json").then(function (cfg) {
+      cfg = cfg || {}; vapidOf(cfg);
+      cfg.subs = (cfg.subs || []).filter(function (s) { return s.endpoint !== ep; });
+      cfg.subs.push({ endpoint: ep, label: str(b.label, 80), t: now() }); cfg.subs = cfg.subs.slice(-10);
+      return store.put("config.json", cfg).then(function () { return { ok: true, count: cfg.subs.length }; });
+    });
+  },
+  "admin.pushunsub": function (b) {
+    return store.get("config.json").then(function (cfg) {
+      cfg = cfg || {}; cfg.subs = (cfg.subs || []).filter(function (s) { return s.endpoint !== String(b.endpoint || ""); });
+      return store.put("config.json", cfg).then(function () { return { ok: true }; });
+    });
+  },
+  "admin.pushtest": function () { return notify("Проверка: уведомления с сайта diluga85 работают.", { title: "diluga85: проверка", link: "/admin.html#chats" }).then(function () { return { ok: true }; }); },
+  "admin.last": function () { return store.get("config.json").then(function (cfg) { return { event: (cfg && cfg.lastEvent) || null }; }); }
 };
 
 /* ---------- HTTP ---------- */

@@ -148,6 +148,7 @@
     if (!el) return;
     if (!API) { el.innerHTML = '<div class="sup-info">Сервер чата ещё не подключён: укажите адрес функции в начале файла chat.js.</div>'; return; }
     draw(); refresh();
+    pushState().then(function (st) { A.push = st; if (A.tab === "chats" && !A.cur) draw(); });
   }
   function loop(ms) { clearTimeout(A.timer); A.timer = setTimeout(function () { if (A.el && document.body.contains(A.el)) refresh(); }, ms); }
   function refresh() {
@@ -169,6 +170,61 @@
     clearTimeout(A.badgeTimer);
     if (API && akey() && document.querySelector(".tabs")) acall({ a: "admin.chats" }).then(function (r) { if (A.tab !== "chats") badge(r.chats); }, function () {});
     A.badgeTimer = setTimeout(badgeLoop, 30000);
+  }
+
+  /* ---------- пуш-уведомления на устройство ---------- */
+  function pushSupported() { return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window; }
+  function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
+  function standalone() { return (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true; }
+  function idbSet(k, v) {
+    return new Promise(function (res) {
+      try {
+        var r = indexedDB.open("diluga-push", 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore("kv"); };
+        r.onsuccess = function () { var tx = r.result.transaction("kv", "readwrite"); tx.objectStore("kv").put(v, k); tx.oncomplete = function () { res(); }; tx.onerror = function () { res(); }; };
+        r.onerror = function () { res(); };
+      } catch (e) { res(); }
+    });
+  }
+  function b64ToBytes(s) { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; var b = atob(s), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+  function pushState() {
+    if (!pushSupported()) return Promise.resolve("unsupported");
+    if (Notification.permission === "denied") return Promise.resolve("denied");
+    return navigator.serviceWorker.getRegistration("/").then(function (r) { return r ? r.pushManager.getSubscription() : null; })
+      .then(function (s) { if (s) idbSet("adminKey", akey()); return s ? "on" : "off"; }, function () { return "off"; });
+  }
+  function pushEnable() {
+    return Notification.requestPermission().then(function (p) {
+      if (p !== "granted") throw new Error("Уведомления не разрешены. Разрешите их для сайта diluga85.shop в настройках браузера.");
+      return Promise.all([navigator.serviceWorker.register("/sw.js"), acall({ a: "admin.pushkey" })]);
+    }).then(function (r) {
+      return navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.getSubscription().then(function (old) { return old ? old.unsubscribe() : null; }).then(function () {
+          return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(r[1].key) });
+        });
+      });
+    }).then(function (sub) {
+      return Promise.all([idbSet("api", API), idbSet("adminKey", akey())]).then(function () {
+        return acall({ a: "admin.pushsub", sub: sub.toJSON(), label: (isIOS() ? "iPhone" : /Android/.test(navigator.userAgent) ? "Android" : "Компьютер") + " · " + new Date().toLocaleDateString("ru-RU") });
+      });
+    });
+  }
+  function pushDisable() {
+    return navigator.serviceWorker.getRegistration("/").then(function (r) { return r ? r.pushManager.getSubscription() : null; }).then(function (s) {
+      if (!s) return; var ep = s.endpoint; return s.unsubscribe().then(function () { return acall({ a: "admin.pushunsub", endpoint: ep }); });
+    });
+  }
+  function pushBlock() {
+    var st = A.push;
+    if (!st) return "";
+    if (st === "unsupported") return '<div class="sup-info">' + (isIOS() && !standalone() ?
+      "Уведомления на iPhone работают только из приложения: в Safari нажмите «Поделиться» → «На экран „Домой“», откройте админку с этой иконки, войдите и включите уведомления здесь." :
+      "Этот браузер не умеет показывать уведомления. Откройте админку в Chrome, Яндекс Браузере или Safari (на iPhone — с экрана «Домой»).") + "</div>";
+    if (st === "denied") return '<div class="sup-info">Уведомления запрещены для diluga85.shop в настройках браузера. Разрешите их и обновите страницу.</div>';
+    if (st === "on") return '<p class="hint">Уведомления на этом устройстве включены · <button class="btn btn-ghost btn-sm" data-sup="pushtest">Проверить</button> <button class="btn btn-ghost btn-sm" data-sup="pushoff">Отключить</button></p>';
+    if (st === "busy") return '<p class="hint">Подключаю уведомления…</p>';
+    return '<div class="sup-info">Включите уведомления, чтобы сразу узнавать о новых сообщениях и заявках. <button class="btn btn-primary btn-sm" data-sup="pushon">Включить на этом устройстве</button>' +
+      (isIOS() ? "" : '<br><span class="hint">Совет: установите админку на телефон (меню браузера → «Добавить на главный экран») — так уведомления приходят надёжнее.</span>') + "</div>";
   }
 
   function draw() {
@@ -194,9 +250,8 @@
       var t2 = el.querySelector("textarea[data-sup-draft]"); if (t2) { t2.value = A.drafts[A.cur] || ""; if (foc) t2.focus(); }
       return;
     }
-    var tg = !A.tg ? "" : A.tg.vk ? '<p class="hint">Уведомления ВКонтакте: ' + esc(A.tg.vkName || "подключены") + ' · <button class="btn btn-ghost btn-sm" data-sup="vklink">Переподключить</button></p>' :
-      A.tg.vkToken ? '<div class="sup-info">Уведомления ВКонтакте не подключены. Напишите своему сообществу ВК любое сообщение (например «привет»), затем <button class="btn btn-ghost btn-sm" data-sup="vklink">Подключить</button></div>' :
-      '<div class="sup-info">Уведомления не настроены: добавьте VK_TOKEN в настройках функции в Yandex Cloud.</div>';
+    var tg = pushBlock() + (A.tg && A.tg.vkToken ? (A.tg.vk ? '<p class="hint">Уведомления ВКонтакте: ' + esc(A.tg.vkName || "подключены") + ' · <button class="btn btn-ghost btn-sm" data-sup="vklink">Переподключить</button></p>' :
+      '<div class="sup-info">Уведомления ВКонтакте не подключены. Напишите своему сообществу ВК любое сообщение, затем <button class="btn btn-ghost btn-sm" data-sup="vklink">Подключить</button></div>') : "");
     var list = A.chats == null ? '<p class="hint">Загружаю…</p>' : !A.chats.length ? '<p class="hint">Пока никто не писал. Кнопка «Чат» есть внизу справа на каждой странице сайта.</p>' :
       A.chats.map(function (c) {
         return '<button class="sup-it' + (c.closed ? " closed" : "") + '" data-sup-open="' + esc(c.id) + '"><span class="t"><span>' + esc(c.name || "Без имени") + "</span>" + (c.unread ? '<span class="dlc-badge">' + c.unread + "</span>" : "") + "<span>" + esc(when(c.updated)) + "</span></span>" +
@@ -225,6 +280,9 @@
       if (act === "back") { A.cur = null; A.chat = null; try { history.replaceState(null, "", location.pathname); } catch (x) {} draw(); refresh(); }
       else if (act === "close") acall({ a: "admin.close", cid: A.cur }).then(refresh, function (x) { A.err = x.message; draw(); });
       else if (act === "logout") { ls("diluga-sup-key", null); A.chats = null; draw(); }
+      else if (act === "pushon") { A.push = "busy"; draw(); pushEnable().then(function () { A.push = "on"; A.err = ""; draw(); }, function (x) { A.err = /[а-яё]/i.test(x.message || "") ? x.message : "Не получилось включить уведомления" + (x.message ? " (" + x.message + ")" : "") + ". На iPhone — только из приложения на экране «Домой»; на Android — в Chrome или Яндекс Браузере."; pushState().then(function (st) { A.push = st; draw(); }); }); }
+      else if (act === "pushoff") { pushDisable().then(function () { A.push = "off"; draw(); }, function (x) { A.err = x.message; draw(); }); }
+      else if (act === "pushtest") { t.disabled = true; t.textContent = "Отправляю…"; acall({ a: "admin.pushtest" }).then(function () { t.textContent = "Отправлено"; }, function (x) { A.err = x.message; draw(); }); }
       else if (act === "vklink") { t.disabled = true; t.textContent = "Подключаю…"; acall({ a: "admin.vklink" }).then(function () { A.err = ""; refresh(); }, function (x) { A.err = x.message; draw(); }); }
       else if (act === "tglink") { t.disabled = true; acall({ a: "admin.tglink" }).then(function () { A.err = ""; refresh(); }, function (x) { A.err = x.message; draw(); }); }
     });
@@ -232,7 +290,7 @@
       var f = e.target;
       if (f.hasAttribute("data-sup-login")) {
         e.preventDefault(); ls("diluga-sup-key", f.pass.value.trim());
-        acall({ a: "admin.check" }).then(function () { A.err = ""; draw(); refresh(); badgeLoop(); }, function () {});
+        acall({ a: "admin.check" }).then(function () { A.err = ""; draw(); refresh(); badgeLoop(); pushState().then(function (st) { A.push = st; draw(); }); }, function () {});
       } else if (f.hasAttribute("data-sup-reply")) {
         e.preventDefault();
         var ta = f.querySelector("textarea"), text = ta.value.trim(); if (!text) return;
