@@ -129,8 +129,7 @@
     });
     var ld2 = { "@context": "https://schema.org", "@type": "ItemList", itemListElement: items };
     var ld3 = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqOf(state).map(function (x) { return { "@type": "Question", name: x.q, acceptedAnswer: { "@type": "Answer", text: x.a } }; }) };
-    var mid = /^\d{5,12}$/.test(String(s.metrikaId || "").trim()) ? String(s.metrikaId).trim() : "";
-    var metrika = mid ? '<!-- Yandex.Metrika counter -->\n<script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,"script","https://mc.yandex.ru/metrika/tag.js?id=' + mid + '", "ym");ym(' + mid + ', "init", {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});<\/script>\n<noscript><div><img src="https://mc.yandex.ru/watch/' + mid + '" style="position:absolute; left:-9999px;" alt="" /></div></noscript>\n<!-- /Yandex.Metrika counter -->\n' : "";
+    var metrika = metrikaTag(s);
     return '<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n' +
       '<link rel="icon" href="/favicon.ico" sizes="any">\n<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">\n<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">\n<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n<link rel="manifest" href="/site.webmanifest">\n<meta name="theme-color" content="#0b0b0c">\n' + metrika +
       "<title>" + esc(title) + "</title>\n" +
@@ -152,10 +151,93 @@
       '<script type="application/json" id="shop-data">' + jsonForScript(state) + "<\/script>\n" +
       '<script src="chat.js?v=' + v + '"><\/script>\n<script src="app.js?v=' + v + '"><\/script>\n</body>\n</html>\n';
   }
+  function metrikaTag(s) {
+    var mid = /^\d{5,12}$/.test(String(s.metrikaId || "").trim()) ? String(s.metrikaId).trim() : "";
+    return mid ? '<!-- Yandex.Metrika counter -->\n<script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,"script","https://mc.yandex.ru/metrika/tag.js?id=' + mid + '", "ym");ym(' + mid + ', "init", {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});<\/script>\n<noscript><div><img src="https://mc.yandex.ru/watch/' + mid + '" style="position:absolute; left:-9999px;" alt="" /></div></noscript>\n<!-- /Yandex.Metrika counter -->\n' : "";
+  }
+  function itemUrl(site, p) { return site + "/item/" + encodeURIComponent(p.id) + ".html"; }
+  function absUrl(site, u) { return /^https?:/i.test(u) ? u : site + "/" + String(u).replace(/^\//, ""); }
+  function xmlEsc(t) { return String(t == null ? "" : t).replace(/[<>&'"]/g, function (c) { return { "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]; }); }
+  function itemName(p) { return [p.brand, p.title].filter(Boolean).join(" "); }
+  function itemPhotos(p) { return (p.photos || []).filter(function (u) { return u && !/^data:/.test(u); }); }
+  function buildFeed(state) {
+    var s = state.settings, site = (s.siteUrl || "").replace(/\/$/, ""); if (!site) return "";
+    var cid = {}, cats = state.categories.map(function (c, i) { cid[c.id] = i + 1; return '    <category id="' + (i + 1) + '">' + xmlEsc(c.name) + "</category>"; });
+    cats.push('    <category id="99">Одежда</category>');
+    var offers = state.products.filter(function (p) { return p.status !== "sold" && +p.price > 0 && itemPhotos(p).length; }).map(function (p) {
+      var ph = itemPhotos(p).slice(0, 10).map(function (u) { return "      <picture>" + xmlEsc(absUrl(site, u)) + "</picture>"; }).join("\n");
+      var d = String(p.description || "").trim(); if (p.measure) d += (d ? "\n" : "") + "Замеры: " + p.measure; if (!d) d = itemName(p) + ". Оригинал, б/у.";
+      return '    <offer id="' + xmlEsc(p.id) + '" available="' + (p.status === "available") + '">\n' +
+        "      <name>" + xmlEsc(itemName(p) + (p.size ? ", размер " + p.size : "")) + "</name>\n" +
+        (p.brand ? "      <vendor>" + xmlEsc(p.brand) + "</vendor>\n" : "") +
+        "      <url>" + xmlEsc(itemUrl(site, p)) + "</url>\n" +
+        "      <price>" + Math.round(+p.price) + "</price>\n" +
+        (+p.oldPrice > +p.price ? "      <oldprice>" + Math.round(+p.oldPrice) + "</oldprice>\n" : "") +
+        "      <currencyId>RUR</currencyId>\n" +
+        "      <categoryId>" + (cid[p.category] || 99) + "</categoryId>\n" + ph + "\n" +
+        "      <delivery>true</delivery>\n" +
+        "      <description><![CDATA[" + d.replace(/\]\]>/g, "]]&gt;") + "]]></description>\n" +
+        (p.size ? '      <param name="Размер">' + xmlEsc(p.size) + "</param>\n" : "") +
+        (p.condition ? '      <param name="Состояние">' + xmlEsc(p.condition) + "</param>\n" : "") +
+        (/новое/i.test(p.condition || "") ? "" : '      <condition type="preowned"><quality>good</quality></condition>\n') +
+        "    </offer>";
+    });
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<yml_catalog date="' + new Date().toISOString().slice(0, 16) + '+00:00">\n  <shop>\n' +
+      "    <name>" + xmlEsc(s.shopName) + "</name>\n    <company>" + xmlEsc(s.shopName) + "</company>\n    <url>" + xmlEsc(site + "/") + "</url>\n" +
+      '    <currencies><currency id="RUR" rate="1"/></currencies>\n    <categories>\n' + cats.join("\n") + "\n    </categories>\n    <offers>\n" + offers.join("\n") + "\n    </offers>\n  </shop>\n</yml_catalog>\n";
+  }
+  function buildItemPage(state, p, v) {
+    var s = state.settings, site = (s.siteUrl || "").replace(/\/$/, ""), name = itemName(p), sold = p.status === "sold";
+    var title = name + (p.size ? ", размер " + p.size : "") + " — " + (sold ? "продано" : money(p.price)) + " | " + s.shopName;
+    var desc = oneLine(p.description) || (name + (p.size ? ", размер " + p.size : "") + ". Оригинал, б/у, в одном экземпляре. Доставка по России.");
+    if (desc.length > 160) desc = desc.slice(0, 157) + "…";
+    var photos = itemPhotos(p), url = itemUrl(site, p);
+    var order = sold ? "" : dmUrl(state, p), avItem = safeUrl(p.avitoUrl), avProf = safeUrl(state.links.avito);
+    var spec = [["Бренд", p.brand], ["Размер", p.size], ["Замеры", p.measure], ["Состояние", p.condition], ["Категория", catName(state, p.category)], ["Статус", STATUS[p.status]]]
+      .filter(function (r) { return r[1]; }).map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+    var acts = sold ? '<p class="note">Эта вещь уже продана. Похожие — в каталоге и в Telegram-канале.</p>' :
+      (p.status === "available" && +p.price > 0 ? '<a class="btn btn-primary" href="../pay.html?id=' + encodeURIComponent(p.id) + '" data-goal="pay_click">Оплатить по QR</a>' : "") +
+      (order ? '<a class="btn ' + (p.status === "available" && +p.price > 0 ? "btn-ghost" : "btn-primary") + '" href="' + esc(order) + '" target="_blank" rel="noopener" data-goal="buy_click">' + (p.status === "reserved" ? "Спросить про бронь" : "Написать продавцу") + "</a>" : "") +
+      (avItem ? '<a class="btn btn-avito" href="' + esc(avItem) + '" target="_blank" rel="noopener" data-goal="avito_click">Купить на Авито</a>' : avProf ? '<a class="btn btn-avito" href="' + esc(avProf) + '" target="_blank" rel="noopener" data-goal="avito_profile">Заказать через Авито</a>' : "");
+    var ld = { "@context": "https://schema.org", "@type": "Product", sku: p.id, name: name, description: p.description || undefined, brand: p.brand ? { "@type": "Brand", name: p.brand } : undefined, size: p.size || undefined,
+      category: catName(state, p.category) || undefined, image: photos.slice(0, 5).map(function (u) { return absUrl(site, u); }),
+      offers: { "@type": "Offer", url: url, price: String(p.price || 0), priceCurrency: "RUB", itemCondition: "https://schema.org/UsedCondition",
+        availability: sold ? "https://schema.org/SoldOut" : p.status === "reserved" ? "https://schema.org/LimitedAvailability" : "https://schema.org/InStock" } };
+    var crumbs = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: s.shopName, item: site + "/" }, { "@type": "ListItem", position: 2, name: name, item: url }] };
+    var mid = /^\d{5,12}$/.test(String(s.metrikaId || "").trim()) ? String(s.metrikaId).trim() : "";
+    return '<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n' +
+      '<link rel="icon" href="/favicon.ico" sizes="any">\n<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n<meta name="theme-color" content="#0b0b0c">\n' + metrikaTag(s) +
+      "<title>" + esc(title) + "</title>\n" + '<meta name="description" content="' + esc(desc) + '">\n' +
+      (sold ? '<meta name="robots" content="noindex,follow">\n' : "") +
+      '<link rel="canonical" href="' + esc(url) + '">\n<meta property="og:type" content="product">\n<meta property="og:title" content="' + esc(title) + '">\n<meta property="og:description" content="' + esc(desc) + '">\n<meta property="og:url" content="' + esc(url) + '">\n' +
+      (photos[0] ? '<meta property="og:image" content="' + esc(absUrl(site, photos[0])) + '">\n' : "") +
+      '<meta name="color-scheme" content="light dark">\n<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="' + FONTS + '">\n' +
+      '<link rel="stylesheet" href="../style.css?v=' + v + '">\n' +
+      '<script type="application/ld+json">' + jsonForScript(ld) + "<\/script>\n" + '<script type="application/ld+json">' + jsonForScript(crumbs) + "<\/script>\n" +
+      "</head>\n<body class=\"ipage\">\n" +
+      '<header class="top"><div class="wrap"><a class="logo" href="../">' + esc(s.shopName) + '</a><a class="btn btn-ghost btn-sm" href="../#catalog">← Весь каталог</a></div></header>\n' +
+      '<main class="wrap ip"><nav class="crumbs"><a href="../">Главная</a> / <a href="../#catalog">Каталог</a> / <span>' + esc(name) + "</span></nav>" +
+      '<div class="ip-grid"><div class="ip-gal">' + (photos.length ? photos.map(function (u, i) { return '<img src="../' + esc(String(u).replace(/^\//, "")) + '" alt="' + esc(name + (i ? " — фото " + (i + 1) : "")) + '"' + (i ? ' loading="lazy"' : "") + ">"; }).join("") : '<div class="noph">Фото скоро</div>') + "</div>" +
+      '<div class="ip-info">' + (p.brand ? '<div class="brand">' + esc(p.brand) + "</div>" : "") + "<h1>" + esc(p.title) + "</h1>" +
+      '<div class="price">' + esc(sold ? "Продано" : money(p.price)) + (p.oldPrice && !sold ? "<s>" + esc(money(p.oldPrice)) + "</s>" : "") + "</div>" +
+      '<dl class="spec">' + spec + "</dl>" + (p.description ? '<div class="txt">' + paras(p.description) + "</div>" : "") +
+      '<div class="acts">' + acts + "</div>" +
+      '<p class="note">Каждая вещь в одном экземпляре. Отправка по России в день оплаты.</p>' +
+      (safeUrl(p.postUrl) ? '<a class="note" href="' + esc(safeUrl(p.postUrl)) + '" target="_blank" rel="noopener" data-goal="tg_post">Открыть пост в канале</a>' : "") +
+      "</div></div></main>\n" +
+      '<footer><div class="wrap"><span>© ' + esc(s.shopName) + "</span><span>" + esc(s.footerNote) + '</span><span class="flinks"><a href="../">Каталог</a></span></div></footer>\n' +
+      (mid ? '<script>document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest("[data-goal]");if(g&&typeof ym==="function")ym(' + mid + ',"reachGoal",g.getAttribute("data-goal"));});<\/script>\n' : "") +
+      "</body>\n</html>\n";
+  }
+  function buildGonePage(state, id) {
+    return '<!doctype html>\n<html lang="ru"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=../"><title>Вещь снята с продажи</title></head><body><p>Вещь снята с продажи. <a href="../">Перейти в каталог</a></p></body></html>\n';
+  }
   function buildSitemap(state) {
     var site = (state.settings.siteUrl || "").replace(/\/$/, ""); if (!site) return "";
     var d = new Date().toISOString().slice(0, 10);
-    return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>' + esc(site) + "/</loc><lastmod>" + d + "</lastmod><changefreq>daily</changefreq></url>\n</urlset>\n";
+    var urls = '  <url><loc>' + esc(site) + "/</loc><lastmod>" + d + "</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>\n";
+    state.products.forEach(function (p) { if (p.status !== "sold") urls += "  <url><loc>" + esc(itemUrl(site, p)) + "</loc><lastmod>" + d + "</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>\n"; });
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls + "</urlset>\n";
   }
   function buildRobots(state) {
     var site = (state.settings.siteUrl || "").replace(/\/$/, "");
@@ -325,7 +407,7 @@
     var idx = Math.min(ui.photoIdx, Math.max(0, (p.photos || []).length - 1));
     var order = dmUrl(state, p);
     var avItem = safeUrl(p.avitoUrl), avProf = safeUrl(state.links.avito);
-    var spec = [["Бренд", p.brand], ["Размер", p.size], ["Состояние", p.condition], ["Категория", catName(state, p.category)], ["Статус", STATUS[p.status]]]
+    var spec = [["Бренд", p.brand], ["Размер", p.size], ["Замеры", p.measure], ["Состояние", p.condition], ["Категория", catName(state, p.category)], ["Статус", STATUS[p.status]]]
       .filter(function (r) { return r[1]; }).map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
     var thumbs = (p.photos || []).length > 1 ? '<div class="thumbs">' + p.photos.map(function (src, i) { return '<button data-ph="' + i + '" aria-current="' + (i === idx) + '" aria-label="Фото ' + (i + 1) + '"><img src="' + esc(src) + '" alt=""></button>'; }).join("") + "</div>" : "";
     var buy = p.status === "sold" ? '<span class="note">Эта вещь уже продана. Похожие ищите в каталоге и в канале.</span>' :
@@ -412,6 +494,11 @@
     var v = Date.now().toString(36);
     files.push({ path: "index.html", content: buildIndexHtml(out, v) });
     var sm = buildSitemap(out); if (sm) files.push({ path: "sitemap.xml", content: sm });
+    var fd = buildFeed(out); if (fd) files.push({ path: "feed.yml", content: fd });
+    if ((out.settings.siteUrl || "").trim()) {
+      out.products.forEach(function (p) { files.push({ path: "item/" + p.id + ".html", content: buildItemPage(out, p, v) }); });
+      (saved ? saved.products : []).forEach(function (p) { if (!out.products.some(function (q) { return q.id === p.id; })) files.push({ path: "item/" + p.id + ".html", content: buildGonePage(out, p.id) }); });
+    }
     files.push({ path: "robots.txt", content: buildRobots(out) });
     files.push({ path: "llms.txt", content: buildLlms(out) });
     var host = (out.settings.siteUrl || "").replace(/^https?:\/\//, "").replace(/\/.*$/, "");
@@ -473,6 +560,7 @@
     return '<button class="ib" data-act="pback" style="align-self:flex-start">← Все товары</button>' +
       fld("Название", 'data-pf="title"', p.title) +
       '<div class="row2">' + fld("Бренд", 'data-pf="brand"', p.brand) + fld("Размер", 'data-pf="size"', p.size) + "</div>" +
+      fld("Замеры, см", 'data-pf="measure"', p.measure || "", "text", "Например: длина 72, ПОТ 58, рукав 63. Покажутся в карточке и на странице вещи.") +
       '<div class="row2">' + fld("Цена, ₽", 'data-pf="price" inputmode="numeric"', p.price, "number") + fld("Старая цена, ₽", 'data-pf="oldPrice" inputmode="numeric"', p.oldPrice, "number", "Покажется зачёркнутой") + "</div>" +
       '<div class="row2"><div class="fld"><label for="f-cat">Категория</label><select id="f-cat" data-pf="category">' + cats + '</select></div>' +
       '<div class="fld"><label for="f-status">Статус</label><select id="f-status" data-pf="status">' + Object.keys(STATUS).map(function (k) { return '<option value="' + k + '"' + (p.status === k ? " selected" : "") + ">" + STATUS[k] + "</option>"; }).join("") + "</select></div></div>" +
