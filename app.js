@@ -212,7 +212,7 @@
       '<link rel="canonical" href="' + esc(url) + '">\n<meta property="og:type" content="product">\n<meta property="og:title" content="' + esc(title) + '">\n<meta property="og:description" content="' + esc(desc) + '">\n<meta property="og:url" content="' + esc(url) + '">\n' +
       (photos[0] ? '<meta property="og:image" content="' + esc(absUrl(site, photos[0])) + '">\n' : "") +
       '<meta name="color-scheme" content="light dark">\n<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="' + FONTS + '">\n' +
-      '<link rel="stylesheet" href="../style.css?v=' + v + '">\n' +
+      '<link rel="stylesheet" href="../style.css?v=' + (s.updatedAt || v) + '">\n' +
       '<script type="application/ld+json">' + jsonForScript(ld) + "<\/script>\n" + '<script type="application/ld+json">' + jsonForScript(crumbs) + "<\/script>\n" +
       "</head>\n<body class=\"ipage\">\n" +
       '<header class="top"><div class="wrap"><a class="logo" href="../">' + esc(s.shopName) + '</a><a class="btn btn-ghost btn-sm" href="../#catalog">← Весь каталог</a></div></header>\n' +
@@ -451,17 +451,30 @@
       return JSON.parse(m[1]);
     });
   }
+  function gitBlobSha(str) {
+    try {
+      var body = new TextEncoder().encode(str), head = new TextEncoder().encode("blob " + body.length + "\0"), all = new Uint8Array(head.length + body.length);
+      all.set(head); all.set(body, head.length);
+      return crypto.subtle.digest("SHA-1", all).then(function (d) { return Array.prototype.map.call(new Uint8Array(d), function (b) { return ("0" + b.toString(16)).slice(-2); }).join(""); }, function () { return ""; });
+    } catch (e) { return Promise.resolve(""); }
+  }
   function commitFiles(files, message) {
     // files: [{path, content (utf-8 string) | base64, encoding, delete}]
-    var ref, baseTree;
+    var ref, baseTree, known = {};
     return api("/git/ref/heads/" + encodeURIComponent(gh.branch)).then(function (r) {
       ref = r.object.sha; return api("/git/commits/" + ref);
     }).then(function (c) {
       baseTree = c.tree.sha;
+      return api("/git/trees/" + baseTree + "?recursive=1").then(function (t) { (t.tree || []).forEach(function (x) { if (x.type === "blob") known[x.path] = x.sha; }); }, function () {});
+    }).then(function () {
       return files.reduce(function (pr, f) {
         return pr.then(function (acc) {
           if (f.delete) { acc.push({ path: f.path, mode: "100644", type: "blob", sha: null }); return acc; }
-          return api("/git/blobs", { method: "POST", body: { content: f.content, encoding: f.encoding || "utf-8" } }).then(function (b) { acc.push({ path: f.path, mode: "100644", type: "blob", sha: b.sha }); return acc; });
+          var pre = (f.encoding || "utf-8") === "utf-8" && known[f.path] ? gitBlobSha(f.content) : Promise.resolve("");
+          return pre.then(function (s) {
+            if (s && s === known[f.path]) return acc;
+            return api("/git/blobs", { method: "POST", body: { content: f.content, encoding: f.encoding || "utf-8" } }).then(function (b) { acc.push({ path: f.path, mode: "100644", type: "blob", sha: b.sha }); return acc; });
+          });
         });
       }, Promise.resolve([]));
     }).then(function (tree) {
@@ -494,7 +507,7 @@
     var v = Date.now().toString(36);
     files.push({ path: "index.html", content: buildIndexHtml(out, v) });
     var sm = buildSitemap(out); if (sm) files.push({ path: "sitemap.xml", content: sm });
-    var fd = buildFeed(out); if (fd) files.push({ path: "feed.yml", content: fd });
+    var fd = buildFeed(out); if (fd) files.push({ path: "feed.xml", content: fd });
     if ((out.settings.siteUrl || "").trim()) {
       out.products.forEach(function (p) { files.push({ path: "item/" + p.id + ".html", content: buildItemPage(out, p, v) }); });
       (saved ? saved.products : []).forEach(function (p) { if (!out.products.some(function (q) { return q.id === p.id; })) files.push({ path: "item/" + p.id + ".html", content: buildGonePage(out, p.id) }); });
