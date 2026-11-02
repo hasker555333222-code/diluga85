@@ -399,3 +399,11 @@ body::after{inset:0;animation:none;opacity:.04}
 .chip[aria-pressed="true"]{animation:none;box-shadow:0 0 18px rgba(198,255,61,.3)}
 .scrim{backdrop-filter:blur(3px)}
 .rv:not(.rv-done) .hero h1 .w{filter:none}
+
+/* v6: кнопка «Написать продавцу» под карточкой */
+.cw{display:flex;flex-direction:column;gap:8px;min-width:0}
+.cw>.card{flex:1}
+.dm{display:flex;align-items:center;justify-content:center;min-height:40px;padding:9px 10px;border-radius:999px;border:1px solid var(--indigo);color:var(--indigo);background:transparent;font-weight:800;font-size:12px;line-height:1.1;text-align:center;text-transform:uppercase;letter-spacing:.04em;text-decoration:none;transition:background .2s,color .2s,transform .2s}
+.dm:hover,.dm:focus-visible{background:var(--indigo);color:var(--indigo-ink);transform:translateY(-1px)}
+.dm:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+@media (max-width:520px){.dm{font-size:11px;letter-spacing:.02em;padding:9px 6px}}

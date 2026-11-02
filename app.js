@@ -54,6 +54,13 @@
     var row2 = words.slice().reverse().map(function (w) { return "<span>" + esc(w) + "</span>"; }).join("");
     return '<div class="mqw" aria-hidden="true"><div class="marquee m2"><div class="mq">' + row2 + row2 + row2 + '</div></div><div class="marquee m1"><div class="mq">' + row + row + row + "</div></div></div>";
   }
+  function reqText(p) { return "Здравствуйте! Хочу купить: " + [p.brand, p.title].filter(Boolean).join(" ") + (p.size ? ", размер " + p.size : "") + (p.price ? ", " + money(p.price) : "") + (p.postUrl ? " — " + p.postUrl : ""); }
+  function dmUrl(st, p) {
+    var own = safeUrl(p.tgUrl), u = own || safeUrl(st.links.order) || safeUrl(st.links.telegram);
+    if (u && !own && /^https:\/\/t\.me\/[A-Za-z0-9_]{4,}\/?$/i.test(u)) u = u.replace(/\/$/, "") + "?text=" + encodeURIComponent(reqText(p));
+    return u;
+  }
+  function dmLink(st, p) { var u = p.status === "sold" ? "" : dmUrl(st, p); return u ? '<a class="dm" href="' + esc(u) + '" target="_blank" rel="noopener" data-goal="buy_click">' + (p.status === "reserved" ? "Спросить про бронь" : "Написать продавцу") + "</a>" : ""; }
   function siteHTML(state, ui) {
     ui = ui || { cat: "all", onlyAvail: false };
     var s = state.settings, L = state.links;
@@ -70,10 +77,10 @@
 
     var cards = list.length ? '<div class="grid">' + list.map(function (p) {
       var meta = [p.size ? "Размер " + p.size : "", p.condition].filter(Boolean).join(" · ");
-      return '<button class="card' + (p.status === "sold" ? " sold" : "") + '" data-open="' + esc(p.id) + '">' + photoBox(p) +
+      return '<div class="cw"><button class="card' + (p.status === "sold" ? " sold" : "") + '" data-open="' + esc(p.id) + '">' + photoBox(p) +
         '<div class="cb">' + (p.brand ? '<div class="brand">' + esc(p.brand) + "</div>" : "") +
         '<div class="ct">' + esc(p.title) + "</div>" + (meta ? '<div class="meta">' + esc(meta) + "</div>" : "") +
-        '<div class="price">' + esc(p.status === "sold" ? "Продано" : money(p.price)) + (p.oldPrice && p.status !== "sold" ? "<s>" + esc(money(p.oldPrice)) + "</s>" : "") + "</div></div></button>";
+        '<div class="price">' + esc(p.status === "sold" ? "Продано" : money(p.price)) + (p.oldPrice && p.status !== "sold" ? "<s>" + esc(money(p.oldPrice)) + "</s>" : "") + "</div></div></button>" + dmLink(state, p) + "</div>";
     }).join("") + "</div>" : '<div class="empty">В этой категории пока пусто. Загляните в Telegram-канал — там все новинки.</div>';
 
     var tg = safeUrl(L.telegram);
@@ -316,7 +323,7 @@
     if (!p) { $("#modal").innerHTML = ""; document.body.style.overflow = ""; return; }
     document.body.style.overflow = "hidden";
     var idx = Math.min(ui.photoIdx, Math.max(0, (p.photos || []).length - 1));
-    var order = safeUrl(p.tgUrl) || safeUrl(state.links.order) || safeUrl(state.links.telegram);
+    var order = dmUrl(state, p);
     var avItem = safeUrl(p.avitoUrl), avProf = safeUrl(state.links.avito);
     var spec = [["Бренд", p.brand], ["Размер", p.size], ["Состояние", p.condition], ["Категория", catName(state, p.category)], ["Статус", STATUS[p.status]]]
       .filter(function (r) { return r[1]; }).map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
@@ -594,7 +601,7 @@
     if (act === "copy") {
       goal("copy_request");
       var p = byId(ui.open); if (!p) return;
-      var txt = "Здравствуйте! Хочу купить: " + [p.brand, p.title].filter(Boolean).join(" ") + (p.size ? ", размер " + p.size : "") + (p.price ? ", " + money(p.price) : "") + (p.postUrl ? " — " + p.postUrl : "");
+      var txt = reqText(p);
       var note = $("#copy-note");
       try { navigator.clipboard.writeText(txt).then(function () { if (note) note.textContent = "Скопировано. Вставьте текст в сообщение в Telegram."; }, function () { if (note) note.textContent = txt; }); } catch (e) { if (note) note.textContent = txt; }
       return;
