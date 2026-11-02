@@ -224,7 +224,7 @@
       '<div class="acts">' + acts + "</div>" +
       '<p class="note">Каждая вещь в одном экземпляре. Отправка по России в день оплаты.</p>' +
       (safeUrl(p.postUrl) ? '<a class="note" href="' + esc(safeUrl(p.postUrl)) + '" target="_blank" rel="noopener" data-goal="tg_post">Открыть пост в канале</a>' : "") +
-      "</div></div></main>\n" +
+      "</div></div>" + similarHTML(state, p, true) + "</main>\n" +
       '<footer><div class="wrap"><span>© ' + esc(s.shopName) + "</span><span>" + esc(s.footerNote) + '</span><span class="flinks"><a href="../">Каталог</a></span></div></footer>\n' +
       (mid ? '<script>document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest("[data-goal]");if(g&&typeof ym==="function")ym(' + mid + ',"reachGoal",g.getAttribute("data-goal"));});<\/script>\n' : "") +
       "</body>\n</html>\n";
@@ -400,6 +400,22 @@
     });
   }
 
+  function similarItems(st, p, n) {
+    var pool = st.products.filter(function (q) { return q.id !== p.id && q.status === "available"; });
+    var same = pool.filter(function (q) { return q.category === p.category; });
+    var sameSize = same.filter(function (q) { return p.size && q.size === p.size; }), other = same.filter(function (q) { return sameSize.indexOf(q) < 0; });
+    var brand = pool.filter(function (q) { return q.category !== p.category && p.brand && q.brand === p.brand; });
+    return sameSize.concat(other, brand).slice(0, n || 4);
+  }
+  function similarHTML(st, p, page) {
+    var list = similarItems(st, p, 4); if (!list.length) return "";
+    return '<div class="sim"><h4>Похожие вещи</h4><div class="sim-g">' + list.map(function (q) {
+      var ph = itemPhotos(q)[0];
+      var inner = (ph ? '<img src="' + esc(page ? "../" + String(ph).replace(/^\//, "") : ph) + '" alt="' + esc(itemName(q)) + '" loading="lazy">' : '<span class="sim-noph"></span>') +
+        '<span class="sim-t">' + esc(itemName(q)) + '</span><span class="sim-p">' + esc(money(q.price)) + (q.size ? " · " + esc(q.size) : "") + "</span>";
+      return page ? '<a class="sim-i" href="' + encodeURIComponent(q.id) + '.html">' + inner + "</a>" : '<button class="sim-i" data-open="' + esc(q.id) + '">' + inner + "</button>";
+    }).join("") + "</div></div>";
+  }
   function renderModal() {
     var p = ui.open && byId(ui.open);
     if (!p) { $("#modal").innerHTML = ""; document.body.style.overflow = ""; return; }
@@ -424,6 +440,7 @@
       '<dl class="spec">' + spec + "</dl>" + (p.description ? '<div class="txt">' + paras(p.description) + "</div>" : "") +
       '<div class="acts">' + buy + "</div>" + '<p class="note" id="copy-note">Нажмите «Скопировать заявку» и вставьте текст в сообщение — так мы быстрее найдём вещь.</p>' +
       (safeUrl(p.postUrl) ? '<a class="note" href="' + esc(safeUrl(p.postUrl)) + '" target="_blank" rel="noopener" data-goal="tg_post">Открыть пост в канале</a>' : "") +
+      (p.status === "available" ? '<p class="note urg">Вещь в единственном экземпляре — напишите продавцу, чтобы забронировать.</p>' : "") + similarHTML(state, p, false) +
       "</div></div></div>";
   }
 
