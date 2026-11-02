@@ -226,7 +226,7 @@
       (safeUrl(p.postUrl) ? '<a class="note" href="' + esc(safeUrl(p.postUrl)) + '" target="_blank" rel="noopener" data-goal="tg_post">Открыть пост в канале</a>' : "") +
       "</div></div>" + similarHTML(state, p, true) + "</main>\n" +
       '<footer><div class="wrap"><span>© ' + esc(s.shopName) + "</span><span>" + esc(s.footerNote) + '</span><span class="flinks"><a href="../">Каталог</a></span></div></footer>\n' +
-      (mid ? '<script>document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest("[data-goal]");if(g&&typeof ym==="function")ym(' + mid + ',"reachGoal",g.getAttribute("data-goal"));});<\/script>\n' : "") +
+      (mid ? '<script>' + (sold ? "" : 'window.dataLayer=window.dataLayer||[];window.dataLayer.push(' + jsonForScript({ ecommerce: { currencyCode: "RUB", detail: { products: [ecomProduct(state, p)] } } }) + ');') + 'document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest("[data-goal]");if(g&&typeof ym==="function")ym(' + mid + ',"reachGoal",g.getAttribute("data-goal"));});<\/script>\n' : "") +
       "</body>\n</html>\n";
   }
   function buildGonePage(state, id) {
@@ -714,7 +714,7 @@
     var d = t.dataset, act = d.act;
     if (act === "close-modal") { if (ev.target !== t) return; ui.open = null; renderModal(); return; }
     if (d.cat) { ui.cat = d.cat; renderSite(); return; }
-    if (d.open) { ui.open = d.open; ui.photoIdx = 0; renderModal(); goal("open_item"); return; }
+    if (d.open) { ui.open = d.open; ui.photoIdx = 0; renderModal(); goal("open_item"); ecomDetail(byId(d.open)); return; }
     if (d.ph) { ui.photoIdx = +d.ph; renderModal(); return; }
     if (act === "copy") {
       goal("copy_request");
@@ -783,6 +783,11 @@
     }
   });
 
+  function ecomProduct(st, p) { return { id: p.id, name: itemName(p), brand: p.brand || undefined, category: catName(st, p.category) || undefined, variant: p.size || undefined, price: +p.price || 0, quantity: 1 }; }
+  function ecomDetail(p) {
+    if (IS_ADMIN || !p || !state) return;
+    try { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ ecommerce: { currencyCode: "RUB", detail: { products: [ecomProduct(state, p)] } } }); } catch (e) {}
+  }
   function goal(name) {
     if (IS_ADMIN || !state) return;
     var id = String(state.settings.metrikaId || "").trim();
@@ -814,7 +819,7 @@
     var c = q.cat, it = q.item;
     if (c && state.categories.some(function (x) { return x.id === c; })) ui.cat = c;
     renderSite();
-    if (it && byId(it)) { ui.open = it; ui.photoIdx = 0; renderModal(); goal("open_item"); }
+    if (it && byId(it)) { ui.open = it; ui.photoIdx = 0; renderModal(); goal("open_item"); ecomDetail(byId(it)); }
     else if (ui.cat !== "all") { var sec = document.getElementById("catalog"); if (sec && sec.scrollIntoView) setTimeout(function () { sec.scrollIntoView(); }, 0); }
   }
 })(typeof window !== "undefined" ? window : this);

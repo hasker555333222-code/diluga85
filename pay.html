@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="style.css">
 <!-- Yandex.Metrika counter -->
-<script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,"script","https://mc.yandex.ru/metrika/tag.js?id=113803023", "ym");ym(113803023, "init", {webvisor:true, clickmap:true, referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
+<script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document,"script","https://mc.yandex.ru/metrika/tag.js?id=113803023", "ym");window.dataLayer=window.dataLayer||[];ym(113803023, "init", {ecommerce:"dataLayer", webvisor:true, clickmap:true, referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});</script>
 <noscript><div><img src="https://mc.yandex.ru/watch/113803023" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
 <style>
@@ -96,6 +96,7 @@
   function num(v) { v = String(v || "").replace(",", ".").replace(/[^\d.]/g, ""); var n = Math.round(+v); return isFinite(n) && n > 0 ? n : 0; }
   function sbpName() { var p = PAY.name.split(/\s+/); return p.length >= 3 ? p[1] + " " + p[2] + " " + p[0].charAt(0) + "." : PAY.name; } // как покажет банк: «Даниил Геннадьевич М.»
   function goal(g) { try { window.ym && ym(113803023, "reachGoal", g); } catch (e) {} }
+  function ecom(type, list, field) { try { window.dataLayer = window.dataLayer || []; var o = { currencyCode: "RUB" }; o[type] = { products: list.map(function (p) { return { id: p.id, name: [p.brand, p.title].filter(Boolean).join(" "), brand: p.brand || undefined, variant: p.size || undefined, price: num(p.price), quantity: 1 }; }) }; if (field) o[type].actionField = field; window.dataLayer.push({ ecommerce: o }); } catch (e) {} }
   function toast(t) { var el = document.getElementById("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove("on"); }, 1600); }
   function copy(text, label) {
     function ok() { toast((label || "Текст") + " скопирован"); }
@@ -227,7 +228,9 @@
       if (!png) png = qrPng(qr, "diluga85 · " + no + " · " + total + " ₽");
       this.href = png; goal("pay_qr_save");
     });
-    document.getElementById("paid").addEventListener("click", function () { goal("pay_done_click"); });
+    var ecItems = items.length ? items : [{ id: "order", title: title || "Заказ", price: total }];
+    ecom("add", ecItems);
+    document.getElementById("paid").addEventListener("click", function () { goal("pay_done_click"); if (!ecom.done) { ecom.done = 1; ecom("purchase", ecItems, { id: no, revenue: total }); } });
     var cf = document.getElementById("cf");
     if (cf) cf.addEventListener("submit", function (e) {
       e.preventDefault();
