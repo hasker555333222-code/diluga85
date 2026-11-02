@@ -1,0 +1,814 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<yml_catalog date="2026-11-02T14:03+00:00">
+  <shop>
+    <name>diluga85</name>
+    <company>diluga85</company>
+    <url>https://diluga85.shop/</url>
+    <currencies><currency id="RUR" rate="1"/></currencies>
+    <categories>
+    <category id="1">Худи</category>
+    <category id="2">Свитшоты</category>
+    <category id="3">Футболки</category>
+    <category id="4">Поло</category>
+    <category id="5">Джинсы Levi&apos;s</category>
+    <category id="99">Одежда</category>
+    </categories>
+    <offers>
+    <offer id="tg90" available="true">
+      <name>Russell × diluga Кастомное худи, размер XL</name>
+      <vendor>Russell × diluga</vendor>
+      <url>https://diluga85.shop/item/tg90.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/58-3.jpg</picture>
+      <picture>https://diluga85.shop/222-1.jpg</picture>
+      <picture>https://diluga85.shop/90-3.jpg</picture>
+      <picture>https://diluga85.shop/78-2.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на рукавах и животе. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg85" available="true">
+      <name>Adidas × diluga Кастомное худи, размер S</name>
+      <vendor>Adidas × diluga</vendor>
+      <url>https://diluga85.shop/item/tg85.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/72-1.jpg</picture>
+      <picture>https://diluga85.shop/228-2.jpg</picture>
+      <picture>https://diluga85.shop/68-4.jpg</picture>
+      <picture>https://diluga85.shop/98-1.jpg</picture>
+      <picture>https://diluga85.shop/img/tg85-mvoh5uvo46.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на рукавах и животе. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">S</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg82" available="true">
+      <name>Nike × diluga Кастомное худи, размер M</name>
+      <vendor>Nike × diluga</vendor>
+      <url>https://diluga85.shop/item/tg82.html</url>
+      <price>3000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/222-3.jpg</picture>
+      <picture>https://diluga85.shop/58-1.jpg</picture>
+      <picture>https://diluga85.shop/235-1.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом сбоку на талии. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">M</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg78" available="true">
+      <name>Champion × diluga Кастомный свитшот, размер XL</name>
+      <vendor>Champion × diluga</vendor>
+      <url>https://diluga85.shop/item/tg78.html</url>
+      <price>3000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>2</categoryId>
+      <picture>https://diluga85.shop/41-3.jpg</picture>
+      <picture>https://diluga85.shop/228-3.jpg</picture>
+      <picture>https://diluga85.shop/78-3.jpg</picture>
+      <picture>https://diluga85.shop/68-1.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на рукаве и спереди. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg72" available="true">
+      <name>Adidas × diluga Кастомное худи, размер L</name>
+      <vendor>Adidas × diluga</vendor>
+      <url>https://diluga85.shop/item/tg72.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/238-4.jpg</picture>
+      <picture>https://diluga85.shop/242-4.jpg</picture>
+      <picture>https://diluga85.shop/231-4.jpg</picture>
+      <picture>https://diluga85.shop/30-2.jpg</picture>
+      <picture>https://diluga85.shop/img/tg72-mvoh5uvo47.jpg</picture>
+      <picture>https://diluga85.shop/img/tg72-mvoh5uvo48.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом спереди и на капюшоне. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">L</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg68" available="true">
+      <name>Champion × diluga Кастомное худи, размер M</name>
+      <vendor>Champion × diluga</vendor>
+      <url>https://diluga85.shop/item/tg68.html</url>
+      <price>4000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/231-1.jpg</picture>
+      <picture>https://diluga85.shop/30-1.jpg</picture>
+      <picture>https://diluga85.shop/85-1.jpg</picture>
+      <picture>https://diluga85.shop/img/tg68-mvoh5uvo49.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на груди. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">M</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg62" available="true">
+      <name>Jordan × diluga Кастомный свитшот, размер L</name>
+      <vendor>Jordan × diluga</vendor>
+      <url>https://diluga85.shop/item/tg62.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>2</categoryId>
+      <picture>https://diluga85.shop/68-3.jpg</picture>
+      <picture>https://diluga85.shop/68-2.jpg</picture>
+      <picture>https://diluga85.shop/48-1.jpg</picture>
+      <picture>https://diluga85.shop/82-1.jpg</picture>
+      <picture>https://diluga85.shop/img/tg62-mvoh5uvo50.jpg</picture>
+      <picture>https://diluga85.shop/img/tg62-mvoh5uvo51.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на груди. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">L</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg52" available="true">
+      <name>Champion × diluga Кастомное худи, размер L</name>
+      <vendor>Champion × diluga</vendor>
+      <url>https://diluga85.shop/item/tg52.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/72-4.jpg</picture>
+      <picture>https://diluga85.shop/41-2.jpg</picture>
+      <picture>https://diluga85.shop/222-4.jpg</picture>
+      <picture>https://diluga85.shop/41-4.jpg</picture>
+      <picture>https://diluga85.shop/img/tg52-mvoh5uvo52.jpg</picture>
+      <picture>https://diluga85.shop/img/tg52-mvoh5uvo53.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на рукаве и груди. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">L</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg48" available="true">
+      <name>Nike Basketball × diluga Кастомное худи, размер L</name>
+      <vendor>Nike Basketball × diluga</vendor>
+      <url>https://diluga85.shop/item/tg48.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/235-2.jpg</picture>
+      <picture>https://diluga85.shop/72-3.jpg</picture>
+      <picture>https://diluga85.shop/238-1.jpg</picture>
+      <picture>https://diluga85.shop/242-1.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на рукавах и спереди. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">L</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg41" available="true">
+      <name>Nike × diluga Кастомный свитшот, размер XL</name>
+      <vendor>Nike × diluga</vendor>
+      <url>https://diluga85.shop/item/tg41.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>2</categoryId>
+      <picture>https://diluga85.shop/235-3.jpg</picture>
+      <picture>https://diluga85.shop/48-3.jpg</picture>
+      <picture>https://diluga85.shop/238-3.jpg</picture>
+      <picture>https://diluga85.shop/94-3.jpg</picture>
+      <picture>https://diluga85.shop/img/tg41-mvoh5uvo54.jpg</picture>
+      <picture>https://diluga85.shop/img/tg41-mvoh5uvo55.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом спереди, сзади и на рукавах. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg39" available="true">
+      <name>Nike × diluga Кастомный свитшот, размер S</name>
+      <vendor>Nike × diluga</vendor>
+      <url>https://diluga85.shop/item/tg39.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>2</categoryId>
+      <picture>https://diluga85.shop/82-2.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом спереди. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">S</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg35" available="true">
+      <name>Adidas EIU × diluga Кастомное худи, размер L</name>
+      <vendor>Adidas EIU × diluga</vendor>
+      <url>https://diluga85.shop/item/tg35.html</url>
+      <price>4000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/78-1.jpg</picture>
+      <picture>https://diluga85.shop/58-2.jpg</picture>
+      <picture>https://diluga85.shop/231-2.jpg</picture>
+      <picture>https://diluga85.shop/48-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на рукавах и груди. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">L</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg30" available="true">
+      <name>Lee × diluga Кастомное худи, размер XL</name>
+      <vendor>Lee × diluga</vendor>
+      <url>https://diluga85.shop/item/tg30.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/52-1.jpg</picture>
+      <picture>https://diluga85.shop/85-4.jpg</picture>
+      <picture>https://diluga85.shop/85-2.jpg</picture>
+      <picture>https://diluga85.shop/85-3.jpg</picture>
+      <picture>https://diluga85.shop/img/tg30-mvoh5uvo56.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на рукаве, груди и спине. Оригинал, ручная вшивка от diluga. Оверсайз, унисекс.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg26" available="true">
+      <name>Champion × diluga Кастомное худи, размер XL</name>
+      <vendor>Champion × diluga</vendor>
+      <url>https://diluga85.shop/item/tg26.html</url>
+      <price>3000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/62-4.jpg</picture>
+      <picture>https://diluga85.shop/26-4.jpg</picture>
+      <picture>https://diluga85.shop/72-2.jpg</picture>
+      <picture>https://diluga85.shop/98-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на груди. На каждый день и в подарок. Оригинал из ОАЭ, ручная вшивка. Оверсайз, унисекс.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg22" available="true">
+      <name>Champion × diluga Кастомное худи, размер L</name>
+      <vendor>Champion × diluga</vendor>
+      <url>https://diluga85.shop/item/tg22.html</url>
+      <price>3500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>1</categoryId>
+      <picture>https://diluga85.shop/202-3.jpg</picture>
+      <picture>https://diluga85.shop/205-2.jpg</picture>
+      <picture>https://diluga85.shop/13-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Кастом на рукаве и груди. Очень удобное. Оригинал из ОАЭ, ручная вшивка. Оверсайз, унисекс.]]></description>
+      <param name="Размер">L</param>
+      <param name="Состояние">Кастом</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg242" available="true">
+      <name>Ralph Lauren Футболка, размер XL</name>
+      <vendor>Ralph Lauren</vendor>
+      <url>https://diluga85.shop/item/tg242.html</url>
+      <price>2000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/94-1.jpg</picture>
+      <picture>https://diluga85.shop/62-2.jpg</picture>
+      <picture>https://diluga85.shop/52-3.jpg</picture>
+      <picture>https://diluga85.shop/30-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Классический дизайн, узнаваемое лого. Унисекс. Оригинал.]]></description>
+      <param name="Размер">XL</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg10" available="true">
+      <name>Ralph Lauren Футболка, размер XL</name>
+      <vendor>Ralph Lauren</vendor>
+      <url>https://diluga85.shop/item/tg10.html</url>
+      <price>1500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/10-2.jpg</picture>
+      <picture>https://diluga85.shop/111-4.jpg</picture>
+      <picture>https://diluga85.shop/102-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Классический дизайн, лого внизу, приятная ткань. Оригинал.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Отличное</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg98" available="true">
+      <name>Ralph Lauren Поло в полоску, размер S</name>
+      <vendor>Ralph Lauren</vendor>
+      <url>https://diluga85.shop/item/tg98.html</url>
+      <price>2000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>4</categoryId>
+      <picture>https://diluga85.shop/48-2.jpg</picture>
+      <picture>https://diluga85.shop/94-2.jpg</picture>
+      <picture>https://diluga85.shop/30-3.jpg</picture>
+      <picture>https://diluga85.shop/90-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Очень приятная ткань в полоску, необычное лого RL. Унисекс. Оригинал.]]></description>
+      <param name="Размер">S</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg102" available="true">
+      <name>Carhartt Футболка оверсайз, размер XL</name>
+      <vendor>Carhartt</vendor>
+      <url>https://diluga85.shop/item/tg102.html</url>
+      <price>990</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/118-1.jpg</picture>
+      <picture>https://diluga85.shop/177-4.jpg</picture>
+      <picture>https://diluga85.shop/17-2.jpg</picture>
+      <picture>https://diluga85.shop/205-1.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Крупное узнаваемое лого. Небольшая дырочка на плече, видно на фото — поэтому такая цена. Оверсайз, унисекс. Оригинал.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Есть дефект</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg13" available="true">
+      <name>Dickies Футболка оверсайз, размер L–XL</name>
+      <vendor>Dickies</vendor>
+      <url>https://diluga85.shop/item/tg13.html</url>
+      <price>2000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/162-3.jpg</picture>
+      <picture>https://diluga85.shop/177-3.jpg</picture>
+      <picture>https://diluga85.shop/124-1.jpg</picture>
+      <picture>https://diluga85.shop/132-1.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Карман на груди, лого на плече, удобная посадка. Оверсайз, унисекс. Оригинал.]]></description>
+      <param name="Размер">L–XL</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg238" available="true">
+      <name>Adidas Футболка, размер XL</name>
+      <vendor>Adidas</vendor>
+      <url>https://diluga85.shop/item/tg238.html</url>
+      <price>1500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/242-3.jpg</picture>
+      <picture>https://diluga85.shop/35-3.jpg</picture>
+      <picture>https://diluga85.shop/41-1.jpg</picture>
+      <picture>https://diluga85.shop/35-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Классический дизайн, узнаваемое лого. Унисекс. Оригинал.]]></description>
+      <param name="Размер">XL</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg235" available="true">
+      <name>Футболка «Восточная сказка», размер L</name>
+      <url>https://diluga85.shop/item/tg235.html</url>
+      <price>1500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/26-1.jpg</picture>
+      <picture>https://diluga85.shop/39-1.jpg</picture>
+      <picture>https://diluga85.shop/8-2.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Арабские мотивы, хлопок. Унисекс. Оригинал.]]></description>
+      <param name="Размер">L</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg231" available="true">
+      <name>Champion Футболка с принтом, размер XL</name>
+      <vendor>Champion</vendor>
+      <url>https://diluga85.shop/item/tg231.html</url>
+      <price>2000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/8-1.jpg</picture>
+      <picture>https://diluga85.shop/62-3.jpg</picture>
+      <picture>https://diluga85.shop/62-1.jpg</picture>
+      <picture>https://diluga85.shop/52-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Необычный олдскульный принт, хлопок. Унисекс. Оригинал.]]></description>
+      <param name="Размер">XL</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg228" available="true">
+      <name>Hugo Boss Футболка, размер XL</name>
+      <vendor>Hugo Boss</vendor>
+      <url>https://diluga85.shop/item/tg228.html</url>
+      <price>1600</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/82-3.jpg</picture>
+      <picture>https://diluga85.shop/26-3.jpg</picture>
+      <picture>https://diluga85.shop/90-1.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Классический дизайн, узнаваемое лого. Унисекс. Оригинал.]]></description>
+      <param name="Размер">XL</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg219" available="true">
+      <name>Izod Классическое поло, размер XXL</name>
+      <vendor>Izod</vendor>
+      <url>https://diluga85.shop/item/tg219.html</url>
+      <price>1400</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>4</categoryId>
+      <picture>https://diluga85.shop/102-3.jpg</picture>
+      <picture>https://diluga85.shop/22-2.jpg</picture>
+      <picture>https://diluga85.shop/192-3.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Классический дизайн, качественный материал. Унисекс.]]></description>
+      <param name="Размер">XXL</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg214" available="true">
+      <name>Billabong Футболка Psycho Tropics, размер L</name>
+      <vendor>Billabong</vendor>
+      <url>https://diluga85.shop/item/tg214.html</url>
+      <price>2200</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/199-3.jpg</picture>
+      <picture>https://diluga85.shop/13-2.jpg</picture>
+      <picture>https://diluga85.shop/img/tg214-mvoh5uvn2.jpg</picture>
+      <picture>https://diluga85.shop/199-2.jpg</picture>
+      <picture>https://diluga85.shop/img/tg214-mvoh5uvn3.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[На спине змея вместо черепа и пальма. Розоватый цвет, мягкая на ощупь. Унисекс. Оригинал.]]></description>
+      <param name="Размер">L</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg212" available="true">
+      <name>Nike Футболка, размер L</name>
+      <vendor>Nike</vendor>
+      <url>https://diluga85.shop/item/tg212.html</url>
+      <price>900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/155-1.jpg</picture>
+      <picture>https://diluga85.shop/162-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Классическое узнаваемое лого. Унисекс. Оригинал.]]></description>
+      <param name="Размер">L</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg209" available="true">
+      <name>Футболка «2 плавца», размер L</name>
+      <url>https://diluga85.shop/item/tg209.html</url>
+      <price>890</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/118-3.jpg</picture>
+      <picture>https://diluga85.shop/184-3.jpg</picture>
+      <picture>https://diluga85.shop/124-3.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Интересный принт, качественный материал. Унисекс.]]></description>
+      <param name="Размер">L</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg207" available="true">
+      <name>Nirvana Футболка, размер M</name>
+      <vendor>Nirvana</vendor>
+      <url>https://diluga85.shop/item/tg207.html</url>
+      <price>900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/162-1.jpg</picture>
+      <picture>https://diluga85.shop/140-4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Мерч, классический дизайн. Унисекс.]]></description>
+      <param name="Размер">M</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg205" available="true">
+      <name>Roblox Футболка, размер S</name>
+      <vendor>Roblox</vendor>
+      <url>https://diluga85.shop/item/tg205.html</url>
+      <price>990</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/13-1.jpg</picture>
+      <picture>https://diluga85.shop/108-2.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Мерч, классический дизайн. Унисекс.]]></description>
+      <param name="Размер">S</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg202" available="true">
+      <name>Nike Футболка, размер M</name>
+      <vendor>Nike</vendor>
+      <url>https://diluga85.shop/item/tg202.html</url>
+      <price>700</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/177-2.jpg</picture>
+      <picture>https://diluga85.shop/177-1.jpg</picture>
+      <picture>https://diluga85.shop/212-1.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Классическое узнаваемое лого. Унисекс. Оригинал.]]></description>
+      <param name="Размер">M</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg192" available="true">
+      <name>Levi&apos;s 510 Classic Slim Stretch — винтажные джинсы, размер талия 45</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg192.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/img/tg192-mvm9krh20.jpg</picture>
+      <picture>https://diluga85.shop/219-2.jpg</picture>
+      <picture>https://diluga85.shop/155-3.jpg</picture>
+      <picture>https://diluga85.shop/132-3.jpg</picture>
+      <picture>https://diluga85.shop/img/tg192-mvoh5uvn4.jpg</picture>
+      <picture>https://diluga85.shop/img/tg192-mvoh5uvn5.jpg</picture>
+      <picture>https://diluga85.shop/img/tg192-mvoh5uvn6.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 45 · бёдра 57 · посадка 27 · длина 102 см. Классический винтажный крой, унисекс. Оригинал.]]></description>
+      <param name="Размер">талия 45</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg184" available="true">
+      <name>Levi&apos;s 529 Curvy Boot Cut — винтажные джинсы, размер талия 37</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg184.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/132-2.jpg</picture>
+      <picture>https://diluga85.shop/155-4.jpg</picture>
+      <picture>https://diluga85.shop/155-2.jpg</picture>
+      <picture>https://diluga85.shop/192-2.jpg</picture>
+      <picture>https://diluga85.shop/img/tg184-mvoh5uvn7.jpg</picture>
+      <picture>https://diluga85.shop/img/tg184-mvoh5uvn8.jpg</picture>
+      <picture>https://diluga85.shop/img/tg184-mvoh5uvo9.jpg</picture>
+      <picture>https://diluga85.shop/img/tg184-mvoh5uvo10.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 37 · бёдра 52 · посадка 25 · длина 97 см. Классический винтажный крой, унисекс. Отлично сядут на стройных. Оригинал.]]></description>
+      <param name="Размер">талия 37</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg177" available="true">
+      <name>Levi&apos;s 505 Straight — винтажные джинсы, размер талия 36</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg177.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/207-2.jpg</picture>
+      <picture>https://diluga85.shop/118-2.jpg</picture>
+      <picture>https://diluga85.shop/111-2.jpg</picture>
+      <picture>https://diluga85.shop/169-4.jpg</picture>
+      <picture>https://diluga85.shop/img/tg177-mvoh5uvo11.jpg</picture>
+      <picture>https://diluga85.shop/img/tg177-mvoh5uvo12.jpg</picture>
+      <picture>https://diluga85.shop/img/tg177-mvoh5uvo13.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 36 · бёдра 47 · посадка 25 · длина 97 см. Классический винтажный крой, унисекс. Отлично сядут на стройных. Оригинал.]]></description>
+      <param name="Размер">талия 36</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg169" available="true">
+      <name>Levi&apos;s 543 Low Boot Cut — винтажные джинсы, размер талия 43</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg169.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/147-4.jpg</picture>
+      <picture>https://diluga85.shop/209-1.jpg</picture>
+      <picture>https://diluga85.shop/140-1.jpg</picture>
+      <picture>https://diluga85.shop/192-4.jpg</picture>
+      <picture>https://diluga85.shop/img/tg169-mvoh5uvo14.jpg</picture>
+      <picture>https://diluga85.shop/img/tg169-mvoh5uvo15.jpg</picture>
+      <picture>https://diluga85.shop/img/tg169-mvoh5uvo16.jpg</picture>
+      <picture>https://diluga85.shop/img/tg169-mvoh5uvo17.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 43 · бёдра 54 · посадка 26 · длина 100 см. Классический винтажный крой, унисекс. Отлично сядут на стройных. Оригинал.]]></description>
+      <param name="Размер">талия 43</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg162" available="true">
+      <name>Levi&apos;s 515 Boot Cut — винтажные джинсы, размер талия 38</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg162.html</url>
+      <price>1000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/10-3.jpg</picture>
+      <picture>https://diluga85.shop/162-2.jpg</picture>
+      <picture>https://diluga85.shop/111-1.jpg</picture>
+      <picture>https://diluga85.shop/140-3.jpg</picture>
+      <picture>https://diluga85.shop/img/tg162-mvoh5uvo18.jpg</picture>
+      <picture>https://diluga85.shop/img/tg162-mvoh5uvo19.jpg</picture>
+      <picture>https://diluga85.shop/img/tg162-mvoh5uvo20.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 38 · бёдра 54 · посадка 26 · длина 100 см. Классический винтажный крой, унисекс. Отлично сядут на стройных. Небольшие потёртости на одной штанине, видно на фото — поэтому такая цена. Оригинал.]]></description>
+      <param name="Размер">талия 38</param>
+      <param name="Состояние">Есть дефект</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg155" available="true">
+      <name>Levi&apos;s 311 Shaping Skinny Filiforme — винтажные джинсы, размер талия 42</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg155.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/214-4.jpg</picture>
+      <picture>https://diluga85.shop/13-3.jpg</picture>
+      <picture>https://diluga85.shop/img/tg155-mvoh5uvo21.jpg</picture>
+      <picture>https://diluga85.shop/102-1.jpg</picture>
+      <picture>https://diluga85.shop/img/tg155-mvoh5uvo22.jpg</picture>
+      <picture>https://diluga85.shop/img/tg155-mvoh5uvo23.jpg</picture>
+      <picture>https://diluga85.shop/img/tg155-mvoh5uvo24.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 42 · бёдра 51 · посадка 29 · длина 100 см. Классический винтажный крой, унисекс. Отлично сядут на стройных. Оригинал.]]></description>
+      <param name="Размер">талия 42</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg147" available="true">
+      <name>Levi&apos;s 510 Boot Cut — винтажные джинсы, размер талия 40</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg147.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/111-3.jpg</picture>
+      <picture>https://diluga85.shop/17-1.jpg</picture>
+      <picture>https://diluga85.shop/184-2.jpg</picture>
+      <picture>https://diluga85.shop/219-3.jpg</picture>
+      <picture>https://diluga85.shop/img/tg147-mvoh5uvo25.jpg</picture>
+      <picture>https://diluga85.shop/img/tg147-mvoh5uvo26.jpg</picture>
+      <picture>https://diluga85.shop/img/tg147-mvoh5uvo27.jpg</picture>
+      <picture>https://diluga85.shop/img/tg147-mvoh5uvo28.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 40 · бёдра 51 · посадка 22.5 · длина 94 см. Классический винтажный крой, унисекс. Отлично сядут на стройных. Оригинал.]]></description>
+      <param name="Размер">талия 40</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg140" available="true">
+      <name>Levi&apos;s 515 Boot Cut — винтажные джинсы, размер талия 44</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg140.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/102-2.jpg</picture>
+      <picture>https://diluga85.shop/199-1.jpg</picture>
+      <picture>https://diluga85.shop/17-4.jpg</picture>
+      <picture>https://diluga85.shop/124-2.jpg</picture>
+      <picture>https://diluga85.shop/img/tg140-mvoh5uvo29.jpg</picture>
+      <picture>https://diluga85.shop/img/tg140-mvoh5uvo30.jpg</picture>
+      <picture>https://diluga85.shop/img/tg140-mvoh5uvo31.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 44 · бёдра 53 · посадка 26 · длина 106 см. Классический винтажный крой, унисекс. Отлично сядут на стройных. Оригинал.]]></description>
+      <param name="Размер">талия 44</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg132" available="true">
+      <name>Levi&apos;s 311 Shaping Skinny — винтажные джинсы, размер талия 43</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg132.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/202-2.jpg</picture>
+      <picture>https://diluga85.shop/140-2.jpg</picture>
+      <picture>https://diluga85.shop/219-1.jpg</picture>
+      <picture>https://diluga85.shop/147-2.jpg</picture>
+      <picture>https://diluga85.shop/img/tg132-mvoh5uvo32.jpg</picture>
+      <picture>https://diluga85.shop/img/tg132-mvoh5uvo33.jpg</picture>
+      <picture>https://diluga85.shop/img/tg132-mvoh5uvo34.jpg</picture>
+      <picture>https://diluga85.shop/img/tg132-mvoh5uvo35.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 43 · бёдра 46 · посадка 28 · длина 100 см. Классический винтажный крой, унисекс. Отлично сядут на стройных. Оригинал.]]></description>
+      <param name="Размер">талия 43</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg124" available="true">
+      <name>Levi&apos;s 545 Low Boot Cut — винтажные джинсы, размер талия 42</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg124.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/22-3.jpg</picture>
+      <picture>https://diluga85.shop/147-1.jpg</picture>
+      <picture>https://diluga85.shop/214-1.jpg</picture>
+      <picture>https://diluga85.shop/108-1.jpg</picture>
+      <picture>https://diluga85.shop/img/tg124-mvoh5uvo36.jpg</picture>
+      <picture>https://diluga85.shop/img/tg124-mvoh5uvo37.jpg</picture>
+      <picture>https://diluga85.shop/img/tg124-mvoh5uvo38.jpg</picture>
+      <picture>https://diluga85.shop/img/tg124-mvoh5uvo39.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 42 · бёдра 50 · посадка 24 · длина 102 см. Классический винтажный крой, унисекс. Оригинал.]]></description>
+      <param name="Размер">талия 42</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg118" available="true">
+      <name>Levi&apos;s 42 Low Straight — винтажные джинсы, размер талия 38</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg118.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/124-4.jpg</picture>
+      <picture>https://diluga85.shop/17-3.jpg</picture>
+      <picture>https://diluga85.shop/118-4.jpg</picture>
+      <picture>https://diluga85.shop/209-2.jpg</picture>
+      <picture>https://diluga85.shop/img/tg118-mvoh5uvo40.jpg</picture>
+      <picture>https://diluga85.shop/img/tg118-mvoh5uvo41.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 38 · бёдра 48 · посадка 34 · длина 106 см. Классический винтажный крой, унисекс. Необычный тянущийся материал. Оригинал.]]></description>
+      <param name="Размер">талия 38</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg111" available="true">
+      <name>Levi&apos;s 512 Slim Taper — винтажные джинсы, размер талия 37</name>
+      <vendor>Levi&apos;s</vendor>
+      <url>https://diluga85.shop/item/tg111.html</url>
+      <price>1900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>5</categoryId>
+      <picture>https://diluga85.shop/132-4.jpg</picture>
+      <picture>https://diluga85.shop/212-2.jpg</picture>
+      <picture>https://diluga85.shop/184-1.jpg</picture>
+      <picture>https://diluga85.shop/147-3.jpg</picture>
+      <picture>https://diluga85.shop/img/tg111-mvoh5uvo42.jpg</picture>
+      <picture>https://diluga85.shop/img/tg111-mvoh5uvo43.jpg</picture>
+      <picture>https://diluga85.shop/img/tg111-mvoh5uvo44.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Замеры: талия 37 · бёдра 45 · посадка 30 · длина 92 см. Классический винтажный крой, унисекс. Рваные штанины с интересным дизайном. Отлично сядут на стройных. Оригинал.]]></description>
+      <param name="Размер">талия 37</param>
+      <param name="Состояние">Отличное, красивые потёртости</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg108" available="true">
+      <name>Adidas Винтажное поло в полоску, размер L</name>
+      <vendor>Adidas</vendor>
+      <url>https://diluga85.shop/item/tg108.html</url>
+      <price>1500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>4</categoryId>
+      <picture>https://diluga85.shop/169-1.jpg</picture>
+      <picture>https://diluga85.shop/169-2.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Приятная на ощупь ткань в полоску. Унисекс. Оригинал.]]></description>
+      <param name="Размер">L</param>
+      <param name="Состояние">Винтаж</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg94" available="true">
+      <name>Tommy Hilfiger Футболка, размер L</name>
+      <vendor>Tommy Hilfiger</vendor>
+      <url>https://diluga85.shop/item/tg94.html</url>
+      <price>1500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/78-4.jpg</picture>
+      <picture>https://diluga85.shop/94-4.jpg</picture>
+      <picture>https://diluga85.shop/img/tg94-mvoh5uvo45.jpg</picture>
+      <picture>https://diluga85.shop/231-3.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Классический дизайн, узнаваемое лого. Унисекс. Оригинал.]]></description>
+      <param name="Размер">L</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="tg8" available="true">
+      <name>Adidas Винтажная футболка, размер XXL</name>
+      <vendor>Adidas</vendor>
+      <url>https://diluga85.shop/item/tg8.html</url>
+      <price>1500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/98-3.jpg</picture>
+      <picture>https://diluga85.shop/35-2.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Чёрная, золотое лого Adidas на груди. Оригинал.]]></description>
+      <param name="Размер">XXL</param>
+      <param name="Состояние">Винтаж</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    </offers>
+  </shop>
+</yml_catalog>
