@@ -260,16 +260,30 @@
     el.innerHTML = '<div class="sup">' + tg + err + list + '<button class="btn btn-ghost btn-sm" data-sup="logout" style="align-self:flex-start">Выйти из чатов</button></div>';
   }
 
-  var ST = { new: "Новый", paid: "Оплата получена", sent: "Отправлен", cancel: "Отменён" };
+  var ST = { new: "Новый", contacted: "Связались, ждём оплату", paid: "Оплата получена", sent: "Отправлен", cancel: "Отменён" };
+  function srcOf(o) { var a = o.attr || {}; return [a.utm_source, a.utm_medium, a.utm_campaign].filter(Boolean).join(" / ") + (a.yclid ? (a.utm_source ? " · " : "") + "yclid" : ""); }
   function ordersHtml() {
     if (A.orders == null) return '<p class="hint">Загружаю…</p>';
-    if (!A.orders.length) return '<p class="hint">Пока нет заказов. Здесь появятся контакты, которые покупатели оставляют на странице оплаты.</p>';
-    return '<p class="hint">Сверяйте поступление по назначению платежа «Заказ D…», затем меняйте статус.</p>' + A.orders.map(function (o) {
-      return '<div class="sup-card"><div class="sup-bar"><b>' + esc(o.no) + "</b><span>" + esc(o.sum) + " ₽</span><span class=\"hint\" style=\"margin-left:auto\">" + esc(when(o.created)) + "</span></div>" +
+    if (!A.orders.length) return '<p class="hint">Пока пусто. Здесь появятся заявки на вещи с сайта и контакты со страницы оплаты.</p>';
+    var paid = A.orders.filter(function (o) { return o.paidAt && o.cid; }).length;
+    return '<p class="hint">Заявка (L…) — покупатель оставил контакт, оплаты ещё нет. Оплата (D…) — покупатель сообщил, что перевёл деньги. «Оплата получена» ставьте только после того, как сами увидели деньги на счёте: это и есть подтверждённая оплата.</p>' +
+      '<div class="sup-bar"><button class="btn btn-ghost btn-sm" data-sup="csv"' + (paid ? "" : " disabled") + '>CSV оплат для Метрики (' + paid + ')</button></div>' +
+      A.orders.map(function (o) {
+      var lead = o.kind === "lead";
+      return '<div class="sup-card"><div class="sup-bar"><b>' + esc(o.no) + "</b><span>" + (lead ? "Заявка" : "Оплата") + " · " + esc(o.sum) + " ₽</span><span class=\"hint\" style=\"margin-left:auto\">" + esc(when(o.created)) + "</span></div>" +
         (o.items ? "<div>" + esc(o.items) + "</div>" : "") +
-        "<dl>" + [["Имя", o.name], [o.method || "Контакт", o.contact], ["Адрес", o.address], ["Комментарий", o.comment]].filter(function (r) { return r[1]; }).map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + nl(r[1]) + "</dd>"; }).join("") + "</dl>" +
+        "<dl>" + [["Имя", o.name], [o.method || "Контакт", o.contact], ["Вещь", o.item && o.item.url], ["Адрес", o.address], ["Комментарий", o.comment], ["Источник", srcOf(o)], ["Оплата подтверждена", o.paidAt ? when(o.paidAt) : ""]].filter(function (r) { return r[1]; }).map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + nl(r[1]) + "</dd>"; }).join("") + "</dl>" +
         '<select data-sup-order="' + esc(o.no) + '" aria-label="Статус заказа">' + Object.keys(ST).map(function (k) { return '<option value="' + k + '"' + (o.status === k ? " selected" : "") + ">" + ST[k] + "</option>"; }).join("") + "</select></div>";
     }).join("");
+  }
+  /* Офлайн-конверсии для Метрики: только заказы, где продавец сам отметил «Оплата получена». */
+  function paidCsv() {
+    var rows = A.orders.filter(function (o) { return o.paidAt && o.cid; }).map(function (o) {
+      return [o.cid, "payment_confirmed", Math.floor(Date.parse(o.paidAt) / 1000), +o.sum || 0, "RUB"].join(",");
+    });
+    var blob = new Blob(["ClientId,Target,DateTime,Price,Currency\n" + rows.join("\n") + "\n"], { type: "text/csv" });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "diluga85-oplaty-" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
 
   function adminEvents() {
@@ -280,6 +294,7 @@
       if (act === "back") { A.cur = null; A.chat = null; try { history.replaceState(null, "", location.pathname); } catch (x) {} draw(); refresh(); }
       else if (act === "close") acall({ a: "admin.close", cid: A.cur }).then(refresh, function (x) { A.err = x.message; draw(); });
       else if (act === "logout") { ls("diluga-sup-key", null); A.chats = null; draw(); }
+      else if (act === "csv") paidCsv();
       else if (act === "pushon") { A.push = "busy"; draw(); pushEnable().then(function () { A.push = "on"; A.err = ""; draw(); }, function (x) { A.err = /[а-яё]/i.test(x.message || "") ? x.message : "Не получилось включить уведомления" + (x.message ? " (" + x.message + ")" : "") + ". На iPhone — только из приложения на экране «Домой»; на Android — в Chrome или Яндекс Браузере."; pushState().then(function (st) { A.push = st; draw(); }); }); }
       else if (act === "pushoff") { pushDisable().then(function () { A.push = "off"; draw(); }, function (x) { A.err = x.message; draw(); }); }
       else if (act === "pushtest") { t.disabled = true; t.textContent = "Отправляю…"; acall({ a: "admin.pushtest" }).then(function () { t.textContent = "Отправлено"; }, function (x) { A.err = x.message; draw(); }); }
@@ -305,7 +320,8 @@
     document.addEventListener("input", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-sup-draft") && A.cur) A.drafts[A.cur] = e.target.value; });
     document.addEventListener("change", function (e) {
       var no = e.target.getAttribute && e.target.getAttribute("data-sup-order"); if (!no) return;
-      acall({ a: "admin.order", no: no, status: e.target.value }).then(function () { A.orders.forEach(function (o) { if (o.no === no) o.status = e.target.value; }); }, function (x) { A.err = x.message; draw(); });
+      var st = e.target.value;
+      acall({ a: "admin.order", no: no, status: st }).then(function () { refresh(); }, function (x) { A.err = x.message; draw(); });
     });
   }
 

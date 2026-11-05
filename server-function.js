@@ -1,5 +1,6 @@
 /*
- * diluga85 — сервер чата поддержки и контактов после оплаты.
+ * diluga85 — сервер чата поддержки, заявок на вещи (lead.create) и контактов после оплаты.
+ * Заявки и оплаты хранятся вместе в orders.json (kind: "lead" | "payment") и видны во вкладке «Заказы» админки.
  * Yandex Cloud Functions, Node.js 18+. Хранилище — бакет Object Storage (доступ через сервисный аккаунт функции).
  *
  * Переменные окружения:
@@ -44,6 +45,12 @@ function str(v, max) { return String(v == null ? "" : v).replace(/[\u0000-\u0008
 function now() { return new Date().toISOString(); }
 function same(a, b) { a = String(a || ""); b = String(b || ""); if (!a || a.length !== b.length) return false; var d = 0; for (var i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
 function fail(code, msg) { var e = new Error(msg); e.code = code; throw e; }
+function normContact(method, v) {
+  v = str(v, LIM.contact);
+  if (method === "phone") { var d = v.replace(/[^\d+]/g, ""), n = d.replace(/\D/g, ""); if (n.length < 10 || n.length > 15) return ""; if (n.length === 10) n = "7" + n; if (n.length === 11 && n.charAt(0) === "8") n = "7" + n.slice(1); return "+" + n; }
+  if (method === "telegram") { var m = /^(?:https?:\/\/)?(?:t\.me\/|telegram\.me\/)?@?([A-Za-z][A-Za-z0-9_]{3,31})\/?$/.exec(v.replace(/\s+/g, "")); return m ? "@" + m[1] : ""; }
+  return "";
+}
 
 var hits = {}; // простое ограничение частоты в рамках экземпляра функции
 function limit(ip, kind, max, perMs) {
@@ -194,20 +201,61 @@ var actions = {
   },
   "chat.poll": function (b) { return loadVisitorChat(b).then(pub); },
 
+  /* Заявка на конкретную вещь с сайта. Успех на сайте показывается только после ответа { ok: true, id }. */
+  "lead.create": function (b, ip) {
+    if (b.website) fail(400, "Ошибка"); // ловушка для ботов
+    if (!(+b.ft >= 1200)) fail(400, "Форма отправлена слишком быстро. Проверьте данные и нажмите ещё раз.");
+    var rid = str(b.rid, 24); if (!/^[a-z0-9]{8,24}$/.test(rid)) fail(400, "Некорректный запрос");
+    var it = b.item || {};
+    var item = { id: str(it.id, 40).replace(/[^\w-]/g, ""), title: str(it.title, 160), size: str(it.size, 40), price: Math.max(0, Math.round(+it.price || 0)), status: str(it.status, 12), category: str(it.category, 40), url: str(it.url, 200) };
+    if (!item.id) fail(400, "Не указана вещь");
+    if (item.url && item.url.indexOf(SITE + "/") !== 0) item.url = "";
+    var method = b.method === "phone" ? "phone" : b.method === "telegram" ? "telegram" : "";
+    var contact = normContact(method, b.contact);
+    if (!method || !contact) fail(400, method === "phone" ? "Проверьте номер телефона" : method === "telegram" ? "Проверьте ник в Telegram: например, @username" : "Укажите телефон или Telegram");
+    if (!b.consent) fail(400, "Нужно согласие на обработку данных");
+    var a = b.attr || {}, attr = {};
+    ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "yclid"].forEach(function (k) { var v = str(a[k], 200); if (v) attr[k] = v; });
+    var land = str(a.landing, 300); if (land) attr.landing = land;
+    var cid = str(b.cid, 40).replace(/[^\d]/g, "");
+    return store.get("orders.json").then(function (all) {
+      all = all || { orders: [] };
+      var t = Date.now();
+      var dup = all.orders.filter(function (x) { return x.kind === "lead" && (x.rid === rid || (x.item && x.item.id === item.id && x.contact === contact && t - Date.parse(x.created) < 30 * 60000)); })[0];
+      if (dup) return { ok: true, id: dup.no, duplicate: true };
+      limit(ip, "lead", 6, 3600000);
+      var o = {
+        kind: "lead", no: "L" + rnd(6).toUpperCase(), rid: rid, created: now(), status: "new",
+        item: item, items: item.title + (item.size ? ", " + item.size : "") + " (" + item.id + ")", sum: item.price,
+        name: str(b.name, LIM.name), method: method === "phone" ? "Телефон" : "Telegram", contact: contact,
+        attr: attr, cid: cid, page: str(b.page, 200)
+      };
+      all.orders.unshift(o); all.orders = all.orders.slice(0, 1000);
+      return store.put("orders.json", all).then(function () {
+        var src = [attr.utm_source, attr.utm_campaign].filter(Boolean).join(" / ") || (attr.yclid ? "Директ (yclid)" : "");
+        return notify("Заявка " + o.no + " с сайта: " + o.items + (item.price ? " — " + item.price + " ₽" : "") + (item.status === "reserved" ? " (сейчас бронь)" : "") +
+          "\n" + [o.name, o.method + ": " + o.contact].filter(Boolean).join("\n") + (item.url ? "\n" + item.url : "") + (src ? "\nИсточник: " + src : "") +
+          "\n\nНапишите покупателю и подтвердите наличие.\n" + SITE + "/admin.html#orders", { title: "Заявка: " + o.items, link: "/admin.html#orders" });
+      }).then(function () { return { ok: true, id: o.no }; });
+    });
+  },
+
   "order.contact": function (b, ip) {
     if (b.website) fail(400, "Ошибка");
     limit(ip, "order", 10, 3600000);
+    var a = b.attr || {}, attr = {};
+    ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "yclid", "landing"].forEach(function (k) { var v = str(a[k], 300); if (v) attr[k] = v; });
     var o = {
-      no: str(b.order, 16).replace(/[^\w-]/g, ""), sum: Math.max(0, Math.round(+b.sum || 0)), items: str(b.items, 300),
+      kind: "payment", no: str(b.order, 16).replace(/[^\w-]/g, ""), sum: Math.max(0, Math.round(+b.sum || 0)), items: str(b.items, 300),
       name: str(b.name, LIM.name), method: str(b.method, 30), contact: str(b.contact, LIM.contact), address: str(b.address, LIM.comment), comment: str(b.comment, LIM.comment),
-      created: now(), status: "new"
+      created: now(), status: "new", attr: attr, cid: str(b.cid, 40).replace(/[^\d]/g, "")
     };
     if (!o.no || !o.contact) fail(400, "Укажите контакт для связи");
     if (!b.consent) fail(400, "Нужно согласие на обработку данных");
     return store.get("orders.json").then(function (all) {
       all = all || { orders: [] };
       var prev = all.orders.filter(function (x) { return x.no === o.no; })[0];
-      if (prev) { o.created = prev.created; o.status = prev.status; }
+      if (prev) { o.created = prev.created; o.status = prev.status; if (prev.paidAt) o.paidAt = prev.paidAt; }
       all.orders = all.orders.filter(function (x) { return x.no !== o.no; });
       all.orders.unshift(o); all.orders = all.orders.slice(0, 1000);
       return store.put("orders.json", all);
@@ -254,9 +302,18 @@ var actions = {
   },
   "admin.orders": function () { return store.get("orders.json").then(function (a) { return { orders: (a && a.orders) || [] }; }); },
   "admin.order": function (b) {
-    var no = str(b.no, 16), st = ["new", "paid", "sent", "cancel"].indexOf(b.status) >= 0 ? b.status : "new";
+    var no = str(b.no, 16), st = ["new", "contacted", "paid", "sent", "cancel"].indexOf(b.status) >= 0 ? b.status : "new";
+    var sum = b.sum === undefined || b.sum === "" ? null : Math.max(0, Math.round(+b.sum || 0));
     return store.get("orders.json").then(function (a) {
-      a = a || { orders: [] }; a.orders.forEach(function (o) { if (o.no === no) o.status = st; });
+      a = a || { orders: [] };
+      a.orders.forEach(function (o) {
+        if (o.no !== no) return;
+        o.status = st;
+        // Подтверждённая оплата = продавец сверил поступление и поставил «Оплата получена». Время фиксируется для офлайн-конверсий Метрики.
+        if ((st === "paid" || st === "sent") && !o.paidAt) o.paidAt = now();
+        if (st === "new" || st === "contacted" || st === "cancel") delete o.paidAt;
+        if (sum !== null) o.sum = sum;
+      });
       return store.put("orders.json", a).then(function () { return { ok: true }; });
     });
   },

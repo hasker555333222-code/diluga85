@@ -71,6 +71,7 @@
 <div class="toast" id="toast"></div>
 <script src="qrcode.js"></script>
 <script src="chat.js"></script>
+<script src="lead.js"></script>
 <script>
 (function () {
   "use strict";
@@ -95,7 +96,7 @@
   function money(n) { return String(Math.round(+n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ₽"; }
   function num(v) { v = String(v || "").replace(",", ".").replace(/[^\d.]/g, ""); var n = Math.round(+v); return isFinite(n) && n > 0 ? n : 0; }
   function sbpName() { var p = PAY.name.split(/\s+/); return p.length >= 3 ? p[1] + " " + p[2] + " " + p[0].charAt(0) + "." : PAY.name; } // как покажет банк: «Даниил Геннадьевич М.»
-  function goal(g) { try { window.ym && ym(113803023, "reachGoal", g); } catch (e) {} }
+  function goal(g, prm) { try { window.ym && ym(113803023, "reachGoal", g, prm || {}); } catch (e) {} }
   function ecom(type, list, field) { try { window.dataLayer = window.dataLayer || []; var o = { currencyCode: "RUB" }; o[type] = { products: list.map(function (p) { return { id: p.id, name: [p.brand, p.title].filter(Boolean).join(" "), brand: p.brand || undefined, variant: p.size || undefined, price: num(p.price), quantity: 1 }; }) }; if (field) o[type].actionField = field; window.dataLayer.push({ ecommerce: o }); } catch (e) {} }
   function toast(t) { var el = document.getElementById("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove("on"); }, 1600); }
   function copy(text, label) {
@@ -230,20 +231,22 @@
     });
     var ecItems = items.length ? items : [{ id: "order", title: title || "Заказ", price: total }];
     ecom("add", ecItems);
-    document.getElementById("paid").addEventListener("click", function () { goal("pay_done_click"); if (!ecom.done) { ecom.done = 1; ecom("purchase", ecItems, { id: no, revenue: total }); } });
+    /* «Я оплатил» — это заявление покупателя, а не подтверждённая оплата: покупку (purchase) в Метрику не отправляем.
+       Подтверждённые оплаты продавец отмечает в админке, а в Метрику они загружаются офлайн-конверсией. */
+    document.getElementById("paid").addEventListener("click", function () { goal("pay_claimed"); });
     var cf = document.getElementById("cf");
     if (cf) cf.addEventListener("submit", function (e) {
       e.preventDefault();
       var btn = cf.querySelector("button[type=submit]"), msg = document.getElementById("cf-msg");
       btn.disabled = true; msg.textContent = "Отправляю…"; msg.className = "hint";
-      window.DilugaSupport.call({ a: "order.contact", order: no, sum: total, items: title, name: cf.name.value, method: cf.method.value, contact: cf.contact.value, address: cf.address.value, comment: cf.comment.value, consent: cf.consent.checked, website: cf.website.value })
+      window.DilugaSupport.call({ a: "order.contact", attr: window.DilugaLead ? window.DilugaLead.attr() : {}, cid: window.DilugaLead ? window.DilugaLead.clientId() : "", order: no, sum: total, items: title, name: cf.name.value, method: cf.method.value, contact: cf.contact.value, address: cf.address.value, comment: cf.comment.value, consent: cf.consent.checked, website: cf.website.value })
         .then(function () {
-          goal("pay_contacts_sent");
+          goal("pay_claimed");
           try { localStorage.setItem("diluga-paid-" + no, "1"); } catch (x) {}
           cf.outerHTML = '<div class="pbox ok-box"><b>Спасибо!</b> Проверим поступление по заказу ' + esc(no) + " и свяжемся с вами: " + esc(cf.method.value + " " + cf.contact.value) + ".</div>";
         }, function (err) { btn.disabled = false; msg.textContent = (err.message || "Не отправилось") + ". Напишите нам в Telegram — кнопка ниже."; msg.className = "hint err"; });
     });
-    goal("pay_open");
+    goal("pay_qr_open", { item_id: items.map(function (p) { return p.id; }).join(",") || undefined, price: total });
   }
 
   /* ---------- Конструктор ссылки (если открыть pay.html без параметров) ---------- */
