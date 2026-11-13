@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<yml_catalog date="2026-11-05T16:00+00:00">
+<yml_catalog date="2026-11-13T10:12+00:00">
   <shop>
     <name>diluga85</name>
     <company>diluga85</company>
@@ -14,6 +14,196 @@
     <category id="99">Одежда</category>
     </categories>
     <offers>
+    <offer id="pmwetj0wt" available="true">
+      <name>adidas Originals Футболка с большим лого трилистника, размер M</name>
+      <vendor>adidas Originals</vendor>
+      <url>https://diluga85.shop/item/pmwetj0wt.html</url>
+      <price>1500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/img/pmwetj0wt-mwetj91q0.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetj0wt-mwetj91q1.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Футболка adidas Originals белого цвета с крупным принтом: трилистник и надпись adidas originals бирюзово-малиновыми буквами. Яркая спортивная классика в стиле 90-х и 2000-х.
+
+— Бренд: adidas Originals (оригинал)
+— Размер: M
+— Цвет: белый, принт бирюзовый и малиновый
+— Состав: хлопок
+— Состояние: хорошее, без дыр и пятен
+— Вещь привезена из Италии
+
+Сидит прямо, подойдёт и парням, и девушкам (унисекс). Легко сочетается с джинсами, карго и спортивками.
+
+Самовывоз в Тюмени или отправка по всей России.]]></description>
+      <param name="Размер">M</param>
+      <param name="Состояние">Хорошее</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="pmwetizz1" available="true">
+      <name>Fila Футболка с крупными буквами FILA, размер L</name>
+      <vendor>Fila</vendor>
+      <url>https://diluga85.shop/item/pmwetizz1.html</url>
+      <price>1500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/img/pmwetizz1-mwetj91q2.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetizz1-mwetj91q3.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetizz1-mwetj91q4.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Футболка Fila белого цвета с крупными буквами FILA по всей вещи — спереди, на спине и на рукавах. Фиолетово-бирюзовый принт в духе ретро-спорта 90-х.
+
+— Бренд: Fila (оригинал)
+— Размер: L
+— Цвет: белый, принт фиолетовый и бирюзовый
+— Состав: хлопок
+— Состояние: хорошее
+— Вещь привезена из Италии
+
+Заметная футболка для повседневного образа, унисекс. Хорошо смотрится навыпуск с широкими джинсами и шортами.
+
+Самовывоз в Тюмени или отправка по всей России.]]></description>
+      <param name="Размер">L</param>
+      <param name="Состояние">Хорошее</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="pmwetiz1b" available="true">
+      <name>adidas Футболка The Go-To Tee с лого, размер XL</name>
+      <vendor>adidas</vendor>
+      <url>https://diluga85.shop/item/pmwetiz1b.html</url>
+      <price>900</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/img/pmwetiz1b-mwetj91q5.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetiz1b-mwetj91q6.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Базовая футболка adidas из линейки The Go-To Tee: белая, с классическим чёрным логотипом adidas с тремя полосками на груди.
+
+— Бренд: adidas (оригинал)
+— Модель: The Go-To Tee
+— Размер: XL
+— Цвет: белый, лого чёрное
+— Состав: хлопок
+— Состояние: хорошее
+— Вещь привезена из Италии
+
+Универсальная футболка на каждый день — для спорта, прогулок и под рубашку. Мягкий хлопок, приятная к телу.
+
+Самовывоз в Тюмени или отправка по всей России.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Хорошее</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="pmwetiy3j" available="true">
+      <name>Nike Футболка Just Do It, loose fit, размер XL</name>
+      <vendor>Nike</vendor>
+      <url>https://diluga85.shop/item/pmwetiy3j.html</url>
+      <price>800</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/img/pmwetiy3j-mwetj91q7.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetiy3j-mwetj91q8.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Футболка Nike с крупной надписью JUST DO IT. на груди — культовый слоган бренда. Белая, свободный крой Loose Fit.
+
+— Бренд: Nike (оригинал)
+— Размер: XL
+— Крой: Loose Fit, свободный
+— Цвет: белый, принт чёрный
+— Состав: хлопок
+— Состояние: хорошее
+— Вещь привезена из Италии
+
+Свободная посадка, отлично смотрится оверсайз. Подходит для спорта и повседневной носки.
+
+Самовывоз в Тюмени или отправка по всей России.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Хорошее</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="pmwetix6m" available="true">
+      <name>Reebok × NFL Винтажная футболка Super Bowl XXXVIII Champions, размер XL</name>
+      <vendor>Reebok × NFL</vendor>
+      <url>https://diluga85.shop/item/pmwetix6m.html</url>
+      <price>2000</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/img/pmwetix6m-mwetj91q9.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetix6m-mwetj91q10.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetix6m-mwetj91q11.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Винтажная футболка Reebok × NFL в честь победы New England Patriots в Super Bowl XXXVIII (2004). Большой принт CHAMPIONS с логотипами NFL и Super Bowl на груди. Коллекционная вещь для фанатов американского футбола и любителей винтажа.
+
+— Бренд: Reebok, официальная продукция NFL (оригинал)
+— Размер: XL
+— Цвет: белый, многоцветный принт
+— Состав: хлопок
+— Состояние: хорошее для винтажа
+— Вещь привезена из Италии
+
+Свободная посадка, отлично смотрится оверсайз. Такие футболки сейчас редко встречаются — настоящий винтаж 2000-х.
+
+Самовывоз в Тюмени или отправка по всей России.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Винтаж</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="pmwetiw8w" available="true">
+      <name>Jordan Футболка Michael Jordan Flight с автографом, размер L</name>
+      <vendor>Jordan</vendor>
+      <url>https://diluga85.shop/item/pmwetiw8w.html</url>
+      <price>2500</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>3</categoryId>
+      <picture>https://diluga85.shop/img/pmwetiw8w-mwetj91q12.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetiw8w-mwetj91q13.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetiw8w-mwetj91q14.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetiw8w-mwetj91q15.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Футболка Air Jordan из коллекции Flight: на спине — надпись Michael Jordan Take Flight с принтом автографа, на груди — ромб Air Jordan Flight Collection, на рукаве — логотип Jumpman.
+
+— Бренд: Jordan / Nike (оригинал)
+— Размер: L
+— Цвет: белый, принт синий
+— Состав: хлопок
+— Состояние: хорошее
+— Вещь привезена из Италии
+
+Стильная баскетбольная классика с ретро-графикой. Подойдёт и для зала, и для повседневного стритвир-образа.
+
+Самовывоз в Тюмени или отправка по всей России.]]></description>
+      <param name="Размер">L</param>
+      <param name="Состояние">Хорошее</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
+    <offer id="pmwetivb9" available="true">
+      <name>Izod Винтажное поло Izod Sport в полоску, размер XL</name>
+      <vendor>Izod</vendor>
+      <url>https://diluga85.shop/item/pmwetivb9.html</url>
+      <price>1600</price>
+      <currencyId>RUR</currencyId>
+      <categoryId>4</categoryId>
+      <picture>https://diluga85.shop/img/pmwetivb9-mwetj91q16.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetivb9-mwetj91q17.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetivb9-mwetj91q18.jpg</picture>
+      <picture>https://diluga85.shop/img/pmwetivb9-mwetj91q19.jpg</picture>
+      <delivery>true</delivery>
+      <description><![CDATA[Винтажное поло Izod Sport в стиле 90-х: крупные вертикальные полосы тёмно-синего, кремового, жёлтого и бирюзового цвета, вышитый логотип IZOD SPORT на груди, контрастный бирюзовый воротник.
+
+— Бренд: Izod (оригинал)
+— Размер: XL
+— Цвет: тёмно-синий, кремовый, жёлтый, бирюзовый
+— Состав: 100% хлопок
+— Состояние: хорошее для винтажа
+— Вещь привезена из Италии
+
+Яркое ретро-поло с характером — для лета, отпуска и повседневных образов. Свободная посадка.
+
+Самовывоз в Тюмени или отправка по всей России.]]></description>
+      <param name="Размер">XL</param>
+      <param name="Состояние">Винтаж</param>
+      <condition type="preowned"><quality>good</quality></condition>
+    </offer>
     <offer id="tg90" available="true">
       <name>Russell × diluga Кастомное худи, размер XL</name>
       <vendor>Russell × diluga</vendor>
