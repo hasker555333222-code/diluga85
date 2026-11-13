@@ -6,7 +6,11 @@
   var KEY = "diluga-ym";
   var API = "https://api-metrika.yandex.net";
   var PERIODS = [["today", "Сегодня"], ["yesterday", "Вчера"], ["7d", "7 дней"], ["30d", "30 дней"]];
-  var S = { period: "today", cache: {}, el: null, loading: false, err: "" };
+  var S = { period: "today", cache: {}, el: null, loading: false, err: "", gen: 0 };
+  var CKEY = "diluga-ym-cache";
+  try { S.cache = JSON.parse(localStorage.getItem(CKEY) || "{}") || {}; } catch (e) { S.cache = {}; }
+  function ttl(p) { return p === "today" ? 3 * 60000 : 30 * 60000; }
+  function saveCache() { try { localStorage.setItem(CKEY, JSON.stringify(S.cache)); } catch (e) {} }
 
   /* токен приходит после входа через Яндекс в адресе страницы: #access_token=… */
   (function grab() {
@@ -30,49 +34,77 @@
     if (p === "7d") return { date1: "6daysAgo", date2: "today" };
     return { date1: "29daysAgo", date2: "today" };
   }
-  function get(path, params) {
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  /* Метрика разрешает не больше 3 одновременных запросов на аккаунт — шлём строго по одному и повторяем при «подождите» */
+  var Q = Promise.resolve();
+  function once(path, params) {
     var qs = Object.keys(params).map(function (k) { return k + "=" + encodeURIComponent(params[k]); }).join("&");
-    return fetch(API + path + (qs ? "?" + qs : ""), { headers: { Authorization: "OAuth " + tok() }, cache: "no-store" }).then(function (r) {
+    return fetch(API + path + (qs ? "?" + qs : ""), { headers: { Authorization: "OAuth " + tok() } }).then(function (r) {
       if (r.status === 401 || r.status === 403) { var e = new Error("auth"); e.auth = true; throw e; }
+      if (r.status === 429 || r.status >= 500) { var q = new Error("busy"); q.retry = true; q.busy = true; throw q; }
       if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
-    });
+    }, function () { var n = new Error("net"); n.retry = true; n.busy = true; throw n; });
+  }
+  function get(path, params) {
+    var waits = [700, 1500, 3000, 5000, 8000];
+    function attempt(i) {
+      return once(path, params).catch(function (e) {
+        if (e && e.retry && i < waits.length) return sleep(waits[i]).then(function () { return attempt(i + 1); });
+        throw e;
+      });
+    }
+    var job = Q.then(function () { return attempt(0); });
+    Q = job.then(function () {}, function () {});
+    return job;
   }
   function data(p, extra) {
-    var o = { ids: COUNTER, lang: "ru", accuracy: "full" }, r = range(p), k;
+    var o = { ids: COUNTER, lang: "ru" }, r = range(p), k;
     for (k in r) o[k] = r[k];
     for (k in extra) o[k] = extra[k];
     return get("/stat/v1/data", o);
   }
   function soft(pr) { return pr.then(function (x) { return x; }, function (e) { if (e && e.auth) throw e; return null; }); }
+  function gm(g) { return "ym:s:goal" + g.id + "reaches"; }
 
-  function load(p) {
-    var oneDay = p === "today" || p === "yesterday";
-    return Promise.all([
-      data(p, { metrics: "ym:s:users,ym:s:visits,ym:s:pageviews,ym:s:bounceRate,ym:s:avgVisitDurationSeconds" }),
-      soft(data(p, { metrics: "ym:s:users,ym:s:visits", dimensions: oneDay ? "ym:s:hour" : "ym:s:date", sort: oneDay ? "ym:s:hour" : "ym:s:date", limit: 100 })),
-      soft(data(p, { metrics: "ym:s:visits", dimensions: "ym:s:lastsignTrafficSource", sort: "-ym:s:visits", limit: 8 })),
-      soft(data(p, { metrics: "ym:s:visits", dimensions: "ym:s:deviceCategory", sort: "-ym:s:visits", limit: 5 })),
-      soft(get("/management/v1/counter/" + COUNTER + "/goals", {})),
-      soft(data(p, { metrics: "ym:s:productImpressions", dimensions: "ym:s:productName", sort: "-ym:s:productImpressions", limit: 10 })),
-      soft(data(p, { metrics: "ym:s:visits", filters: "ym:s:lastsignTrafficSource=='ad'" }))
-    ]).then(function (r) {
-      var goals = (r[4] && r[4].goals || []).filter(function (g) { return g && g.id; });
-      var chunks = [], i;
-      for (i = 0; i < goals.length; i += 20) chunks.push(goals.slice(i, i + 20));
-      return Promise.all(chunks.map(function (c) {
-        return soft(data(p, { metrics: c.map(function (g) { return "ym:s:goal" + g.id + "reaches"; }).join(",") }));
-      })).then(function (gr) {
-        var reach = [];
-        gr.forEach(function (res, ci) {
-          var t = res && res.totals ? res.totals : [];
-          chunks[ci].forEach(function (g, j) { reach.push({ name: g.name, n: +t[j] || 0 }); });
+  /* грузим по частям: сначала цифры и клики, потом график, источники, устройства, вещи — и сразу показываем */
+  function load(p, d, alive, step) {
+    var base = "ym:s:users,ym:s:visits,ym:s:pageviews,ym:s:bounceRate,ym:s:avgVisitDurationSeconds";
+    function part(key, params) {
+      return function () {
+        if (!alive()) return;
+        return soft(data(p, params)).then(function (x) { if (alive()) { d[key] = x; step(); } });
+      };
+    }
+    return soft(get("/management/v1/counter/" + COUNTER + "/goals", {})).then(function (g) {
+      if (!alive()) return;
+      var goals = (g && g.goals || []).filter(function (x) { return x && x.id; });
+      var first = goals.slice(0, 15), rest = goals.slice(15), reach = [];
+      return data(p, { metrics: base + first.map(function (x) { return "," + gm(x); }).join("") }).then(function (r) {
+        var t = r && r.totals || [];
+        d.totals = t.slice(0, 5);
+        first.forEach(function (x, j) { reach.push({ name: x.name, n: +t[5 + j] || 0 }); });
+        var chunks = [], i;
+        for (i = 0; i < rest.length; i += 20) chunks.push(rest.slice(i, i + 20));
+        return chunks.reduce(function (pr, c) {
+          return pr.then(function () {
+            if (!alive()) return;
+            return soft(data(p, { metrics: c.map(gm).join(",") })).then(function (res) {
+              var tt = res && res.totals || [];
+              c.forEach(function (x, j) { reach.push({ name: x.name, n: +tt[j] || 0 }); });
+            });
+          });
+        }, Promise.resolve()).then(function () {
+          reach.sort(function (a, b) { return b.n - a.n; });
+          d.goals = reach;
+          if (alive()) step();
         });
-        reach.sort(function (a, b) { return b.n - a.n; });
-        var ads = r[6] && r[6].totals ? +r[6].totals[0] || 0 : 0;
-        return { totals: r[0].totals || [], series: r[1], sources: r[2], devices: r[3], goals: reach, products: r[5], ads: ads, oneDay: oneDay, at: Date.now() };
       });
-    });
+    })
+      .then(part("series", { metrics: "ym:s:users,ym:s:visits", dimensions: d.oneDay ? "ym:s:hour" : "ym:s:date", sort: d.oneDay ? "ym:s:hour" : "ym:s:date", limit: 100 }))
+      .then(part("sources", { metrics: "ym:s:visits", dimensions: "ym:s:lastsignTrafficSource", sort: "-ym:s:visits", limit: 8 }))
+      .then(part("devices", { metrics: "ym:s:visits", dimensions: "ym:s:deviceCategory", sort: "-ym:s:visits", limit: 5 }))
+      .then(part("products", { metrics: "ym:s:productImpressions", dimensions: "ym:s:productName", sort: "-ym:s:productImpressions", limit: 10 }));
   }
 
   function bars(rows, label) {
@@ -117,36 +149,53 @@
       return '<button class="chip" data-st-p="' + p[0] + '" aria-pressed="' + (S.period === p[0]) + '">' + p[1] + "</button>";
     }).join("") + '<button class="ib" data-st="reload" aria-label="Обновить" title="Обновить">↻</button></div>';
     var d = S.cache[S.period];
-    if (S.err) { el.innerHTML = '<div class="st">' + tabs + '<p class="msg err">' + esc(S.err) + "</p></div>"; return; }
-    if (!d) { el.innerHTML = '<div class="st">' + tabs + '<p class="hint">Загружаю статистику…</p></div>'; return; }
+    if (!d || !d.totals) {
+      el.innerHTML = '<div class="st">' + tabs + (S.err ? '<p class="msg err">' + esc(S.err) + "</p>" : '<p class="hint">Загружаю статистику… Метрика отвечает по одному запросу, это займёт несколько секунд.</p>') + "</div>";
+      return;
+    }
+    var wait = '<p class="hint">Загружаю…</p>';
     var t = d.totals;
-    var cards = [["Посетители", n(t[0])], ["Визиты", n(t[1])], ["Просмотры", n(t[2])], ["С рекламы", n(d.ads)], ["Отказы", (Math.round((+t[3] || 0) * 10) / 10) + "%"], ["Время на сайте", dur(t[4])]];
-    var goals = d.goals.filter(function (g) { return g.n > 0; });
-    var zero = d.goals.length - goals.length;
+    var src = rowsOf(d.sources), ad = 0;
+    if (d.sources && d.sources.data) d.sources.data.forEach(function (x) { if (x.dimensions[0].id === "ad") ad = +x.metrics[0] || 0; });
+    var cards = [["Посетители", n(t[0])], ["Визиты", n(t[1])], ["Просмотры", n(t[2])], ["С рекламы", d.sources === undefined ? "…" : n(ad)], ["Отказы", (Math.round((+t[3] || 0) * 10) / 10) + "%"], ["Время на сайте", dur(t[4])]];
+    var all = d.goals || [];
+    var goals = all.filter(function (g) { return g.n > 0; });
+    var zero = all.length - goals.length;
     var prods = rowsOf(d.products);
     var dev = rowsOf(d.devices);
     el.innerHTML = '<div class="st">' + tabs +
+      (S.err ? '<p class="msg err">' + esc(S.err) + "</p>" : "") +
       '<div class="st-cards">' + cards.map(function (c) { return '<div class="st-card"><span>' + c[0] + "</span><b>" + c[1] + "</b></div>"; }).join("") + "</div>" +
-      "<h4>Посетители по " + (d.oneDay ? "часам" : "дням") + "</h4>" + chart(d.series, d.oneDay) +
       "<h4>Что нажимали</h4>" + (goals.length ? bars(goals.map(function (g) { return { k: g.name, v: g.n }; })) : '<p class="hint">За этот период нажатий на кнопки не было.</p>') +
-      (zero ? '<p class="hint">Ещё ' + zero + " " + (zero === 1 ? "действие" : zero < 5 ? "действия" : "действий") + " без нажатий.</p>" : "") +
-      (prods.length ? "<h4>Какие вещи смотрели</h4>" + bars(prods) : "") +
-      "<h4>Откуда пришли</h4>" + (rowsOf(d.sources).length ? bars(rowsOf(d.sources)) : '<p class="hint">Нет данных.</p>') +
-      (dev.length ? "<h4>Устройства</h4>" + bars(dev) : "") +
-      '<p class="hint">Метрика обновляет данные с задержкой в несколько минут. Обновлено в ' + new Date(d.at).toTimeString().slice(0, 5) + '. <a href="https://metrika.yandex.ru/dashboard?id=' + COUNTER + '" target="_blank" rel="noopener">Открыть Метрику</a> · <a href="#" data-st="logout">Отключить</a></p>' +
+      (zero ? '<p class="hint">Остальные ' + zero + " " + (zero === 1 ? "действие" : zero < 5 ? "действия" : "действий") + " за этот период никто не сделал.</p>" : "") +
+      "<h4>Посетители по " + (d.oneDay ? "часам" : "дням") + "</h4>" + (d.series === undefined ? wait : chart(d.series, d.oneDay)) +
+      "<h4>Откуда пришли</h4>" + (d.sources === undefined ? wait : src.length ? bars(src) : '<p class="hint">Нет данных.</p>') +
+      (d.devices === undefined ? "<h4>Устройства</h4>" + wait : dev.length ? "<h4>Устройства</h4>" + bars(dev) : "") +
+      (d.products === undefined ? "<h4>Какие вещи смотрели</h4>" + wait : prods.length ? "<h4>Какие вещи смотрели</h4>" + bars(prods) : "") +
+      '<p class="hint">' + (d.done ? "Обновлено в " + new Date(d.at).toTimeString().slice(0, 5) + ". Метрика показывает данные с задержкой в несколько минут." : "Догружаю остальное…") +
+      ' <a href="https://metrika.yandex.ru/dashboard?id=' + COUNTER + '" target="_blank" rel="noopener">Открыть Метрику</a> · <a href="#" data-st="logout">Отключить</a></p>' +
       "</div>";
   }
 
   function refresh(force) {
-    var p = S.period;
+    var p = S.period, old = S.cache[p];
+    if (force || (old && new Date(old.at).toDateString() !== new Date().toDateString())) { old = null; delete S.cache[p]; }
     if (!tok()) { view(); return; }
-    if (!force && S.cache[p] && Date.now() - S.cache[p].at < 60000) { view(); return; }
-    if (S.loading === p) return;
-    S.loading = p; S.err = ""; if (force) delete S.cache[p]; view();
-    load(p).then(function (d) { S.cache[p] = d; }, function (e) {
-      if (e && e.auth) { try { localStorage.removeItem(KEY); } catch (x) {} S.err = ""; }
-      else if (S.period === p) S.err = "Не получилось загрузить статистику. Проверьте интернет и нажмите ↻.";
-    }).then(function () { if (S.loading === p) S.loading = false; view(); });
+    if (!force && old && old.done && Date.now() - old.at < ttl(p)) { view(); return; }
+    if (S.loading === p) { view(); return; }
+    var g = ++S.gen;
+    function alive() { return g === S.gen && S.period === p; }
+    var d = { at: Date.now(), oneDay: p === "today" || p === "yesterday" };
+    if (!(old && old.done)) S.cache[p] = d;
+    S.loading = p; S.err = ""; view();
+    load(p, d, alive, function () { if (d.totals && !(old && old.done)) S.cache[p] = d; view(); }).then(function () {
+      if (!alive()) return;
+      d.done = true; d.at = Date.now(); S.cache[p] = d; saveCache();
+    }, function (e) {
+      if (e && e.auth) { try { localStorage.removeItem(KEY); localStorage.removeItem(CKEY); } catch (x) {} S.cache = {}; S.err = ""; return; }
+      if (!alive()) return;
+      S.err = e && e.busy ? "Метрика сейчас занята и просит подождать. Через минуту нажмите ↻." : "Не получилось загрузить статистику. Проверьте интернет и нажмите ↻.";
+    }).then(function () { if (S.loading === p && g === S.gen) S.loading = false; view(); });
   }
 
   function mount(el) {
@@ -174,7 +223,7 @@
     if (t.dataset.stP) { S.period = t.dataset.stP; S.err = ""; refresh(false); return; }
     var a = t.dataset.st;
     if (a === "reload") refresh(true);
-    else if (a === "logout") { try { localStorage.removeItem(KEY); } catch (x) {} S.cache = {}; view(); }
+    else if (a === "logout") { try { localStorage.removeItem(KEY); localStorage.removeItem(CKEY); } catch (x) {} S.cache = {}; S.gen++; S.loading = false; view(); }
     else if (a === "connect") {
       location.href = "https://oauth.yandex.ru/authorize?response_type=token&client_id=" + encodeURIComponent(CLIENT_ID) +
         "&redirect_uri=" + encodeURIComponent(location.origin + location.pathname);
