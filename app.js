@@ -674,9 +674,9 @@
     var el = $("#admin"); if (!el) return;
     if (!ui.admin) { el.innerHTML = ""; document.body.classList.remove("with-drawer"); return; }
     document.body.classList.add("with-drawer");
-    var tabs = [["products", "Товары"], ["chats", "Чаты"], ["orders", "Заказы"], ["texts", "Тексты"], ["links", "Ссылки"], ["cats", "Категории"], ["seo", "SEO"]];
+    var tabs = [["products", "Товары"], ["stats", "Статистика"], ["chats", "Чаты"], ["orders", "Заказы"], ["texts", "Тексты"], ["links", "Ссылки"], ["cats", "Категории"], ["seo", "SEO"]];
     var sup = ui.tab === "chats" || ui.tab === "orders";
-    var body = sup ? '<div id="sup"></div>' : ui.tab === "products" ? (ui.editing ? productForm(byId(ui.editing)) : productList()) :
+    var body = sup ? '<div id="sup"></div>' : ui.tab === "stats" ? '<div id="stats-root"></div>' : ui.tab === "products" ? (ui.editing ? productForm(byId(ui.editing)) : productList()) :
       ui.tab === "texts" ? textsForm() : ui.tab === "links" ? linksForm() : ui.tab === "cats" ? catsForm() : seoForm();
     el.innerHTML = '<aside class="drawer" aria-label="Админка"><div class="dh"><b>Админка</b><span class="hint">' + state.products.length + ' товаров</span><button class="ib" data-act="logout" style="margin-left:auto">Выйти</button></div>' +
       '<div class="tabs" role="tablist">' + tabs.map(function (t) { return '<button role="tab" data-tab="' + t[0] + '" aria-selected="' + (ui.tab === t[0]) + '">' + t[1] + "</button>"; }).join("") + "</div>" +
@@ -685,6 +685,7 @@
       '<button class="btn btn-primary" data-act="publish"' + (ui.busy || !ui.dirty ? " disabled" : "") + ">" + (ui.busy ? "Сохраняю…" : "Сохранить на сайт") + "</button>" +
       '<button class="btn btn-ghost" data-act="revert"' + (ui.busy || !ui.dirty ? " disabled" : "") + ">Отменить изменения</button></div></aside>";
     if (window.DilugaSupport) window.DilugaSupport.mount(sup ? ui.tab : null, sup ? $("#sup") : null);
+    if (window.DilugaStats) window.DilugaStats.mount(ui.tab === "stats" ? $("#stats-root") : null);
   }
   function productList() {
     var rows = state.products.map(function (p, i) {
@@ -813,7 +814,7 @@
     $("#site").innerHTML = '<div class="login"><p class="msg">Загружаю каталог…</p></div>';
     api("").then(function (r) { gh.branch = c.branch || r.default_branch || "main"; return loadFromRepo(); }).then(function (data) {
       cfgSave(gh); state = data; saved = clone(data); ui.admin = true;
-      var ht = window.DilugaSupport && window.DilugaSupport.hashTab(); if (ht) ui.tab = ht;
+      var ht = (window.DilugaSupport && window.DilugaSupport.hashTab()) || (window.DilugaStats && window.DilugaStats.hashTab()); if (ht) ui.tab = ht;
       renderSite(); renderAdmin();
       if (window.DilugaSupport) window.DilugaSupport.badgeLoop();
     }, function (e) {
